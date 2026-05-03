@@ -1,3 +1,18 @@
+---
+gsd_state_version: 1.0
+milestone: v2.0
+milestone_name: Scale & Polish
+status: planning
+last_updated: "2026-05-03T14:07:53.612Z"
+last_activity: 2026-05-03
+progress:
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
+---
+
 # Project State
 
 ## Project Reference
@@ -33,3 +48,10 @@ See: `.planning/PROJECT.md` (updated 2026-05-02)
 - **Pre-upload Strategy**: Immediate upload on drop reduces form submission complexity by converting binary handling into a simple JSON field (URL) submission.
 - **Backend-driven Export**: Implementing CSV generation on the backend ensures data integrity and consistency across different client types (web, mobile, admin).
 - **Selection Hook**: Decoupling selection state from the data table allows for easier reuse across multiple dashboard pages (Inventory, Orders, etc.).
+
+## Current Position
+
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-03 — Milestone v2.0 started

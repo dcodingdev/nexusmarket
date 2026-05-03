@@ -8,55 +8,61 @@ NexusMarket is a full-stack, multi-vendor e-commerce platform designed to connec
 
 To provide a frictionless, real-time marketplace experience where customers can effortlessly discover and purchase products, and vendors can manage their operations and payouts with complete transparency.
 
+## Current Milestone: v2.0 "Scale & Polish"
+
+**Goal**: Transform the core functional platform into a production-hardened, high-traffic marketplace with robust B2C features and resilient infrastructure.
+
+**Target features**:
+- **Auth & RBAC**: Full registration/login flows and Role-Based Access Control logic on the frontend.
+- **Customer Portal**: Account dashboards, order history, address management, and product reviews.
+- **Vendor Financials**: Advanced earnings tracking, commission calculation, and payout scheduling.
+- **Discovery Polish**: Faceted search, filtering, and infinite scroll storefront UX.
+- **Infrastructure**: API Gateway rate limiting (WAF) and MongoDB Read Replicas for discovery scaling.
+
 ## Requirements
 
-### Validated
+### Validated (v1.0 Accomplishments)
 
-<!-- Shipped and confirmed valuable. Inferred from existing backend. -->
+- ✓ **Multi-vendor Foundation** — Core storefront discovery and masonry grid.
+- ✓ **Unified Checkout** — Stripe-integrated multi-vendor checkout with stock locking.
+- ✓ **Vendor Operations** — Inventory CRUD and drag-and-drop media uploads.
+- ✓ **Real-time Chat** — Socket.io communication between customers and vendors.
+- ✓ **Admin Oversight** — Global moderation portal for users and products.
 
-- ✓ Microservices Architecture — Backend services for Auth, Product, Order, Payment, Chat, and Email established.
-- ✓ Database & ORM — Shared PostgreSQL database via `packages/database` with Prisma/Drizzle.
-- ✓ Asynchronous Messaging — RabbitMQ for handling inter-service events (e.g., order placement, notifications).
-- ✓ Payment Gateway Foundation — Stripe configured in the payment service for checkouts and vendor payouts.
-- ✓ API Gateway — Nginx set up for rate-limiting and routing.
+### Active (v2.0 Scope)
 
-### Active
-
-<!-- Current scope. Building toward these for the frontend. -->
-
-- [ ] Customer Storefront (Next.js) — Dynamic Product Grids, Real-time Search Filtering, and Multi-step Checkout Flows.
-- [ ] Vendor Dashboard (React/Vite) — Data-dense Management Tables, Drag-and-drop media uploads for catalogs, and financial analytics.
-- [ ] Admin Oversight Panel (React/Vite) — Global oversight, user management, and platform analytics.
-- [ ] Real-time Inventory UI — Integration with backend stock locking during checkout.
-- [ ] Order Management UI — Timeline/Gantt views for tracking order fulfillment stages (Processing to Delivered).
-- [ ] Real-time Chat & Notifications — Interactive chat windows between customers and vendors with automated WebSocket alerts.
-- [ ] Automated Revenue Splitting UI — Dashboards displaying Platform Commission vs. Vendor Payout timelines.
+- [ ] **RBAC & Auth Flows** — Registration, Login, and frontend route protection based on user roles.
+- [ ] **Customer Account Suite** — Order tracking history, address book management, and user profiles.
+- [ ] **Product Reviews** — System for customers to rate and review purchased products.
+- [ ] **Financial Payouts** — Automated earnings calculations and payout status timelines for vendors.
+- [ ] **Advanced Filtering** — Category-specific facets (e.g., size, color, brand) in the storefront.
+- [ ] **Infinite Scroll UX** — Replacing standard pagination with a seamless masonry infinite grid.
+- [ ] **Rate Limiting & WAF** — API Gateway protection against DDoS and scraping.
+- [ ] **Read Replicas** — Offloading search/discovery queries to MongoDB Read Replicas.
 
 ### Out of Scope
 
-<!-- Explicit boundaries. Includes reasoning to prevent re-adding. -->
-
-- [Mobile Native Apps] — Focusing entirely on responsive web applications for this milestone to ensure rapid delivery.
-- [Custom Logistics/Shipping Network] — Relying on third-party shipping statuses rather than building an internal delivery fleet management system.
+- [Mobile Native Apps] — Focusing on PWA and responsive web for this milestone.
+- [Custom Logistics Network] — Continuing to rely on external shipping providers.
 
 ## Context
 
-- **Backend Readiness**: The backend microservices layer is mostly completed, providing REST endpoints and WebSocket connections ready to be consumed by the frontend.
-- **Tech Stack**: Next.js (App Router) with Tailwind CSS v4 for the storefront; React/Vite for internal dashboards.
-- **Architecture**: Monorepo using Turborepo to share types and configurations between the frontend apps and backend services.
+- **Milestone v1.0 Outcome**: Successfully established the "Happy Path" from product upload to checkout and real-time chat.
+- **Backend Status**: Backend services are being extended to support RBAC and Read Replicas.
+- **Architecture**: Continuing with the Turborepo microservices pattern.
 
 ## Constraints
 
-- **Tech Stack**: Must use React, Next.js, and Tailwind CSS v4 to match the newly initialized frontend stack.
-- **Data Consistency**: Must rely on the existing backend services for state truth (e.g., real-time stock locking) rather than managing complex state locally.
+- **RBAC Alignment**: Frontend RBAC logic must strictly mirror the `auth-service` middleware permissions.
+- **Performance**: Search/Discovery latency must remain below 100ms using Read Replicas.
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| 3 Separate Portals | Different user types (Customers, Vendors, Admins) have vastly different UI/UX needs (SEO vs Data Density). | — Pending |
-| Next.js for Customer | SEO is critical for product discovery and the storefront. | — Pending |
-| React/Vite for Vendor/Admin | Fast SPAs are better for data-dense, highly interactive dashboards where SEO doesn't matter. | — Pending |
+| Read Replicas for Search | High discovery traffic shouldn't impact write performance for orders/payments. | — Pending |
+| API Gateway Rate Limiting | Protect microservices from automated scraping and abuse. | — Pending |
+| Frontend-driven RBAC | Reduce unnecessary backend requests for simple UI permission checks. | — Pending |
 
 ## Evolution
 
@@ -76,4 +82,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-02 after project initialization*
+*Last updated: 2026-05-03 for Milestone v2.0*

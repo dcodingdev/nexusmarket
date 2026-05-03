@@ -1,47 +1,53 @@
 # NexusMarket Roadmap
 
-## Overview
-This roadmap organizes the frontend delivery of NexusMarket into focused execution phases. The backend microservices are primarily complete, so these phases focus entirely on the UI/UX, state management, and integration with the existing APIs.
+## Milestone v1.0: Foundation & Operations (DONE)
+- ✓ Phase 1: Core Foundation
+- ✓ Phase 2: Operations & Real-Time
+- ✓ Phase 3: Catalog Polish
 
 ---
 
-## Phase 1: The Core Foundation (Must Haves)
-*Establish the fundamental shopping and vendor management flow.*
+## Milestone v2.0: Scale & Polish
 
-- [x] **Phase 1.1: Next.js Storefront Foundation** (Storefront, PDPs, Grid) `[DONE]`
-  - Implement responsive grid layouts and SEO-optimized Product Detail Pages (PDPs).
-  - Connect dynamic fetching (TanStack Query / Next.js caching) for prices and stock.
-- [x] **Phase 1.2: Vendor Dashboard Initial CRUD** `[DONE]`
-  - Implement dashboard shell, inventory tables, and product CRUD with Zod validation.
-- [x] **Phase 1.3: Unified Cart & Checkout Flow** `[DONE]`
-  - Implement persistent cart state (localStorage / Zustand).
-  - Build the multi-step checkout UI.
-  - Integrate Stripe elements and handle real-time stock locking logic (handling 409 Conflicts gracefully).
+### Phase 4: Identity & Security
+**Goal**: Secure the platform with full authentication and Role-Based Access Control (RBAC).
+- **Phase 4.1: RBAC & Auth Integration**
+  - [ ] Implement Register/Login pages (AUTH-01)
+  - [ ] Frontend JWT logic and role-based routing (AUTH-02, AUTH-04)
+  - [ ] Secure token refresh mechanism (AUTH-03)
+
+### Phase 5: B2C Experience
+**Goal**: Build a premium customer account experience.
+- **Phase 5.1: Customer Portal & History**
+  - [ ] Customer Dashboard and profile management (CUST-01)
+  - [ ] Order history and status tracking (CUST-02)
+- **Phase 5.2: Addresses & Reviews**
+  - [ ] Multi-address management (CUST-03)
+  - [ ] Product rating and review system (CUST-04)
+
+### Phase 6: Vendor Economics
+**Goal**: Provide sellers with transparent financial tools.
+- **Phase 6.1: Earnings & Commission UI**
+  - [ ] Real-time earnings visualization (VEND-01)
+  - [ ] Transaction-level commission breakdown (VEND-02)
+- **Phase 6.2: Payouts & History**
+  - [ ] Payout schedule timeline (VEND-03)
+  - [ ] Historical withdrawal logs (VEND-04)
+
+### Phase 7: Discovery & Performance
+**Goal**: Optimize product discovery for scale and speed.
+- **Phase 7.1: Faceted Search & Filters**
+  - [ ] Sidebar with dynamic facets (DISC-01)
+  - [ ] Search autocomplete and sorting (DISC-02, DISC-04)
+- **Phase 7.2: Infinite Scroll & Scaling**
+  - [ ] Masonry infinite scroll (DISC-03)
+  - [ ] MongoDB Read Replica integration for discovery (PERF-02)
+  - [ ] Redis catalog caching (PERF-03)
+
+### Phase 8: Platform Hardening
+**Goal**: Protect the infrastructure from abuse.
+- **Phase 8.1: API Gateway Security**
+  - [ ] Global rate limiting and WAF policies (PERF-01)
 
 ---
-
-## Phase 2: Operations & Real-Time (Should Haves)
-*Enable efficient vendor fulfillment and customer support.*
-
-- [x] **Phase 2.1: Order Management & Timelines** `[DONE]`
-  - Implement order tracking UI for customers.
-  - Build interactive Timeline/Gantt views for vendors to visualize and transition order states (`Processing` -> `Shipped` -> `Delivered`).
-- [x] **Phase 2.2: Real-time Chat** `[DONE]`
-  - Implement WebSocket client connections.
-  - Build interactive chat windows for customer-vendor communication.
-  - Integrate offline notification alerts.
-- [x] **Phase 2.3: Admin Oversight Portal** `[DONE]`
-  - Build the Admin SPA (React/Vite) for global metrics and moderation.
-
----
-
-## Phase 3: Polish & Enhancements (Could Haves)
-*Refine the experience and add quality-of-life features.*
-
-- [x] **Phase 3.2: Advanced Catalog Management**
- (completed 2026-05-03)
-  - Implement drag-and-drop media uploads for vendor products.
-  - Add bulk CSV export functionality.
-
----
-*Roadmap generated following NexusMarket project initialization.*
+*Last updated: 2026-05-03*
