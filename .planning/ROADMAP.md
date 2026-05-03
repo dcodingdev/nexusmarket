@@ -19,11 +19,11 @@
 ### Phase 5: B2C Experience
 **Goal**: Build a premium customer account experience.
 - **Phase 5.1: Customer Portal & History**
-  - [ ] Customer Dashboard and profile management (CUST-01)
-  - [ ] Order history and status tracking (CUST-02)
+  - [x] Customer Dashboard and profile management (CUST-01)
+  - [x] Order history and status tracking (CUST-02)
 - **Phase 5.2: Addresses & Reviews**
-  - [ ] Multi-address management (CUST-03)
-  - [ ] Product rating and review system (CUST-04)
+  - [x] Multi-address management (CUST-03)
+  - [x] Product rating and review system (CUST-04)
 
 ### Phase 6: Vendor Economics
 **Goal**: Provide sellers with transparent financial tools.
