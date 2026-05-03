@@ -1,9 +1,9 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@repo/types';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -18,13 +18,17 @@ interface AuthGuardProps {
 export const AuthGuard = ({ children, allowedRoles, fallback }: AuthGuardProps) => {
   const { user, isAuthenticated, role } = useAuth();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     // If not authenticated, redirect to login
     if (!isAuthenticated) {
       router.push('/login');
     }
   }, [isAuthenticated, router]);
+
+  if (!mounted || !isAuthenticated) return null;
 
   // If role check is required
   if (allowedRoles && role && !allowedRoles.includes(role as UserRole)) {

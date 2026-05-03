@@ -1,5 +1,7 @@
 'use client';
 
+import React from 'react';
+
 import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@repo/types';
 import { notFound } from 'next/navigation';
@@ -17,6 +19,13 @@ interface RoleGuardProps {
  */
 export const RoleGuard = ({ children, role, fallback }: RoleGuardProps) => {
   const { user, isAuthenticated, role: userRole } = useAuth();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   // If not authenticated, we don't handle redirect here (Middleware does it)
   if (!isAuthenticated) return null;
