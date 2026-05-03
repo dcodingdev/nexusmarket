@@ -1,3 +1,20 @@
+---
+wave: 1
+depends_on: []
+files_modified:
+  - apps/web/src/lib/auth.ts
+  - apps/web/src/context/AuthContext.tsx
+  - apps/web/src/hooks/useAuth.ts
+  - apps/web/middleware.ts
+  - apps/web/src/app/(vendor)/layout.tsx
+  - apps/web/src/app/(admin)/layout.tsx
+  - apps/web/src/app/(store)/login/page.tsx
+  - apps/web/src/app/(store)/register/page.tsx
+  - apps/web/src/app/(store)/register/vendor/page.tsx
+  - apps/web/src/components/layout/Sidebar.tsx
+autonomous: true
+requirements: [AUTH-01, AUTH-02, AUTH-03, AUTH-04]
+---
 # Phase 4 Plan: Identity & Security
 
 **Goal**: Secure the platform with full authentication and Role-Based Access Control (RBAC).
