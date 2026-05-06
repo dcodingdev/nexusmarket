@@ -120,6 +120,35 @@ router.route("/")
   );
 
 /**
+ * @route   GET /api/v1/products/export
+ * @desc    Export products as CSV
+ * @access  Private (Vendor, Admin)
+ */
+router.get(
+  "/export",
+  authenticate,
+  authorize([UserRole.VENDOR, UserRole.ADMIN]),
+  productController.exportProducts
+);
+
+/**
+ * @route   POST /api/v1/products/upload
+ * @desc    Upload an image and get the URL
+ * @access  Private (Vendor, Admin)
+ */
+router.post(
+  "/upload",
+  authenticate,
+  authorize([UserRole.VENDOR, UserRole.ADMIN]),
+  upload.single("image"),
+  uploadToImageKit,
+  (req, res) => {
+    const fileData = (req as any).fileData;
+    res.status(200).json({ success: true, url: fileData?.image?.[0]?.url });
+  }
+);
+
+/**
  * @route   GET /api/v1/products/:id
  * @desc    Get a single product by ID
  * @access  Public
@@ -158,35 +187,6 @@ router.patch(
   authenticate, 
   authorize([UserRole.VENDOR, UserRole.ADMIN]), 
   productController.togglePublishStatus
-);
-
-/**
- * @route   GET /api/v1/products/export
- * @desc    Export products as CSV
- * @access  Private (Vendor, Admin)
- */
-router.get(
-  "/export",
-  authenticate,
-  authorize([UserRole.VENDOR, UserRole.ADMIN]),
-  productController.exportProducts
-);
-
-/**
- * @route   POST /api/v1/products/upload
- * @desc    Upload an image and get the URL
- * @access  Private (Vendor, Admin)
- */
-router.post(
-  "/upload",
-  authenticate,
-  authorize([UserRole.VENDOR, UserRole.ADMIN]),
-  upload.single("image"),
-  uploadToImageKit,
-  (req, res) => {
-    const fileData = (req as any).fileData;
-    res.status(200).json({ success: true, url: fileData?.image?.[0]?.url });
-  }
 );
 
 export default router;

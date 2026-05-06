@@ -22,8 +22,16 @@ export function createSocketServer(httpServer: HttpServer): TypedServer {
   const redisUrl = process.env.REDIS_URL;
   if (redisUrl) {
     try {
-      const pubClient = new Redis(redisUrl);
-      const subClient = pubClient.duplicate();
+      const pubClient = new Redis(redisUrl, {
+        maxRetriesPerRequest: null,
+        family: 4,
+      });
+      const subClient = new Redis(redisUrl, {
+        maxRetriesPerRequest: null,
+        family: 4,
+      });
+
+
 
       pubClient.on("error", (err) => {
         logger.warn({ err }, "Socket.io Redis pub client error");

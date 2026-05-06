@@ -21,6 +21,8 @@ import {
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_placeholder");
 
+import { useAuthStore } from "@/store/useAuthStore";
+
 interface PaymentStepProps {
   shippingData: any;
   onBack: () => void;
@@ -29,6 +31,7 @@ interface PaymentStepProps {
 
 export default function PaymentStep({ shippingData, onBack, onReset }: PaymentStepProps) {
   const { items } = useCartStore();
+  const { accessToken } = useAuthStore();
   const [clientSecret, setClientSecret] = useState("");
   const [orderId, setOrderId] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -37,13 +40,14 @@ export default function PaymentStep({ shippingData, onBack, onReset }: PaymentSt
 
   useEffect(() => {
     const initializeCheckout = async () => {
+      if (!accessToken) return;
       try {
         // 1. Create Order & Lock Stock
-        const orderRes = await fetch("http://localhost:4001/api/v1/orders", {
+        const orderRes = await fetch("http://localhost:8000/api/v1/orders", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // Assuming token is here
+            Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify({
             items: items.map((i) => ({
@@ -76,11 +80,11 @@ export default function PaymentStep({ shippingData, onBack, onReset }: PaymentSt
         );
 
         // 2. Create Payment Intent
-        const paymentRes = await fetch("http://localhost:4003/api/v1/payments", {
+        const paymentRes = await fetch("http://localhost:8000/api/v1/payments/process", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify({
             orderId: createdOrderId,

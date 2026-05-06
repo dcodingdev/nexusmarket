@@ -15,19 +15,22 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
-async function fetchAllProducts(search = "") {
-  const token = localStorage.getItem("token");
+import { useAuthStore } from "@/store/useAuthStore";
+import React from "react";
+
+async function fetchAllProducts(token: string | null, search = "") {
+  if (!token) return null;
   const url = search 
-    ? `http://localhost:4002/api/products?search=${search}` 
-    : `http://localhost:4002/api/products`;
+    ? `http://localhost:8000/api/v1/products?search=${search}` 
+    : `http://localhost:8000/api/v1/products`;
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) throw new Error("Failed to fetch products");
   return res.json();
 }
 
-async function togglePublish(productId: string) {
-  const token = localStorage.getItem("token");
-  const res = await fetch(`http://localhost:4002/api/products/${productId}/publish`, {
+async function togglePublish(productId: string, token: string | null) {
+  if (!token) throw new Error("Unauthorized");
+  const res = await fetch(`http://localhost:8000/api/v1/products/${productId}/publish`, {
     method: "PATCH",
     headers: { Authorization: `Bearer ${token}` }
   });
@@ -38,14 +41,16 @@ async function togglePublish(productId: string) {
 export default function ProductOversightPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = React.useState("");
+  const { accessToken } = useAuthStore();
   
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-products", search],
-    queryFn: () => fetchAllProducts(search),
+    queryKey: ["admin-products", search, accessToken],
+    queryFn: () => fetchAllProducts(accessToken, search),
+    enabled: !!accessToken,
   });
 
   const mutation = useMutation({
-    mutationFn: togglePublish,
+    mutationFn: (productId: string) => togglePublish(productId, accessToken),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       toast.success("Product visibility updated");
@@ -143,7 +148,6 @@ export default function ProductOversightPage() {
   );
 }
 
-import React from "react";
 function cn(...inputs: any[]) {
   return inputs.filter(Boolean).join(" ");
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, 
   Users, 
@@ -23,8 +24,11 @@ const NAV_ITEMS = [
   { icon: ShoppingCart, label: "Order Feed", href: "/admin/orders" },
 ];
 
+import { useAuth } from "@/hooks/useAuth";
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { logout } = useAuth();
 
   return (
     <RoleGuard role={UserRole.ADMIN}>
@@ -60,7 +64,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </nav>
 
           <div className="p-4 border-t">
-            <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start gap-3 text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
+              onClick={logout}
+            >
               <LogOut className="w-4 h-4" />
               Sign Out
             </Button>

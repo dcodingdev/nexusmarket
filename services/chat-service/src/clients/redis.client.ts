@@ -2,15 +2,17 @@ import { Redis } from 'ioredis';
 
 let redis: Redis | null = null;
 
-const redisUrl = process.env.REDIS_URL;
-if (!redisUrl) {
-    throw new Error('REDIS_URL is not defined');
-}
-
 export const getRedisClient = (): Redis => {
+    const redisUrl = process.env.REDIS_URL;
+    if (!redisUrl) {
+        throw new Error('REDIS_URL is not defined');
+    }
+
     if (!redis) {
         redis = new Redis(redisUrl, {
             lazyConnect: true,
+            maxRetriesPerRequest: null,
+            family: 4,
         });
 
         redis.on('error', (error: Error) => {

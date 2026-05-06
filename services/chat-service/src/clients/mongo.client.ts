@@ -2,9 +2,9 @@ import { MongoClient } from 'mongodb';
 
 let client: MongoClient | null = null;
 
-const mongoUri = process.env.MONGO_URI;
+const mongoUri = process.env.CHAT_MONGO_URI || process.env.MONGO_URI;
 if (!mongoUri) {
-    throw new Error('MONGO_URI is not defined');
+    throw new Error('CHAT_MONGO_URI or MONGO_URI is not defined');
 }
 
 export const getMongoClient = async (): Promise<MongoClient> => {

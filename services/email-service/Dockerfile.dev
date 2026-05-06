@@ -11,7 +11,7 @@ COPY packages/ ./packages/
 COPY services/email-service/package.json ./services/email-service/
 
 # Now run install (it will find @repo/auth-service now)
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --no-frozen-lockfile --shamefully-hoist
 
 # 3. Copy the source code for the shared packages
 COPY packages/ ./packages/

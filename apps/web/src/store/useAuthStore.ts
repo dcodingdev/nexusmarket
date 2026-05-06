@@ -28,7 +28,8 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'nexus-auth-storage',
       // Only persist user info, let refreshToken handle session restoration
-      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
+      partialize: (state) => ({ user: state.user, accessToken: state.accessToken, isAuthenticated: state.isAuthenticated }),
+
     }
   )
 );

@@ -21,8 +21,7 @@ const conversationSchema = new Schema<IConversation>(
     participantIds: [
       { 
         type: String, 
-        required: true,
-        index: true 
+        required: true
       }
     ],
     lastMessageAt: { 

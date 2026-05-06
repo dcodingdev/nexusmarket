@@ -113,18 +113,28 @@ export interface RMQEvent<T = any> {
   };
 }
 
-export const connectRMQ = async (uri: string) => {
+export const connectRMQ = async (uri: string, retries = 5, delay = 2000) => {
   if (connection && channel) return { connection, channel };
-  try {
-    connection = await amqp.connect(uri);
-    channel = await connection.createChannel();
-    logger.info('🐇 RabbitMQ Connected');
-    return { connection, channel };
-  } catch (error) {
-    logger.error({ err: error }, '❌ RabbitMQ Connection Failed');
-    throw error;
+  
+  for (let i = 0; i < retries; i++) {
+    try {
+      connection = await amqp.connect(uri);
+      channel = await connection.createChannel();
+      logger.info('🐇 RabbitMQ Connected');
+      return { connection, channel };
+    } catch (error) {
+      if (i === retries - 1) {
+        logger.error({ err: error }, '❌ RabbitMQ Connection Failed after max retries');
+        throw error;
+      }
+      logger.warn(`🐇 RabbitMQ Connection Attempt ${i + 1} failed. Retrying in ${delay}ms...`);
+      await new Promise(res => setTimeout(res, delay));
+      delay *= 1.5; // Exponential backoff
+    }
   }
+  throw new Error('RabbitMQ Connection Failed');
 };
+
 
 export const publishEvent = async (exchange: string, routingKey: string, payload: any) => {
   if (!channel) throw new Error('RabbitMQ channel not initialized');

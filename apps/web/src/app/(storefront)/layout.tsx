@@ -1,9 +1,17 @@
+"use client";
+
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 import { ChatBubble } from "@/modules/chat/components/ChatBubble";
 
+import { useAuth } from "@/hooks/useAuth";
+import { User, LogOut, LayoutDashboard } from "lucide-react";
+
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, logout, user } = useAuth();
+
   return (
     <>
       <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
@@ -15,6 +23,32 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-4">
             <ThemeToggle />
+            
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2">
+                {user?.role?.toUpperCase() === 'ADMIN' && (
+                  <Link href="/admin">
+                    <Button variant="ghost" size="sm" className="gap-2">
+                      <LayoutDashboard className="w-4 h-4" />
+                      Dashboard
+                    </Button>
+                  </Link>
+                )}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="gap-2 text-muted-foreground hover:text-red-500"
+                  onClick={logout}
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <Link href="/login">
+                <Button variant="default" size="sm">Sign In</Button>
+              </Link>
+            )}
           </div>
         </div>
       </nav>

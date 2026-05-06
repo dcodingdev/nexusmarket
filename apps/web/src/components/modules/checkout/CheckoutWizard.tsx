@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CartReview from "./CartReview";
 import ShippingForm from "./ShippingForm";
 import PaymentStep from "./PaymentStep";
@@ -8,6 +8,13 @@ import PaymentStep from "./PaymentStep";
 export default function CheckoutWizard() {
   const [currentStep, setCurrentStep] = useState(0);
   const [shippingData, setShippingData] = useState<any>(null);
+  const [hasHydrated, setHasHydrated] = useState(false);
+
+  useEffect(() => {
+    setHasHydrated(true);
+  }, []);
+
+  if (!hasHydrated) return null;
 
   const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 2));
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));

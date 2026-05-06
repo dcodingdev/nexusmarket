@@ -1,6 +1,7 @@
-"use strict";
+"use client";
 
-import { useCartStore, getGroupedItems } from "@/stores/cart-store";
+import { useMemo } from "react";
+import { useCartStore, type CartItem } from "@/stores/cart-store";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
@@ -8,14 +9,27 @@ interface CartReviewProps {
   onNext: () => void;
 }
 
+
+
 export default function CartReview({ onNext }: CartReviewProps) {
   const { items, updateQuantity, removeItem, clearCart } = useCartStore();
-  const groupedItems = useCartStore(getGroupedItems);
+  
+  const groupedItems = useMemo(() => {
+    return items.reduce((acc, item) => {
+      if (!acc[item.vendor]) {
+        acc[item.vendor] = [];
+      }
+      acc[item.vendor].push(item);
+      return acc;
+    }, {} as Record<string, CartItem[]>);
+  }, [items]);
 
-  const totalAmount = items.reduce(
-    (acc, item) => acc + item.priceAtPurchase * item.quantity,
-    0
-  );
+  const totalAmount = useMemo(() => {
+    return items.reduce(
+      (acc, item) => acc + item.priceAtPurchase * item.quantity,
+      0
+    );
+  }, [items]);
 
   if (items.length === 0) {
     return (

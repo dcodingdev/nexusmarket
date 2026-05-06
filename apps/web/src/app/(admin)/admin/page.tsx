@@ -11,27 +11,31 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuthStore } from "@/store/useAuthStore";
 
-async function fetchAdminStats() {
-  const token = localStorage.getItem("token");
+async function fetchAdminStats(token: string | null) {
+  if (!token) return null;
   const [users, products, orders] = await Promise.all([
-    fetch("http://localhost:4001/api/v1/users", { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-    fetch("http://localhost:4002/api/products", { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-    fetch("http://localhost:4001/api/v1/orders/all", { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+    fetch("http://localhost:8000/api/v1/users", { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+    fetch("http://localhost:8000/api/v1/products", { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+    fetch("http://localhost:8000/api/v1/orders/all", { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
   ]);
 
   return {
-    totalUsers: users?.pagination?.total || 0,
-    totalProducts: products?.total || 0,
-    totalOrders: orders?.pagination?.total || 0,
-    totalRevenue: (orders?.docs || []).reduce((acc: number, o: any) => acc + o.totalAmount, 0),
+    totalUsers: users?.pagination?.total || users?.totalDocs || users?.data?.length || 0,
+    totalProducts: products?.totalDocs || products?.total || products?.data?.length || 0,
+    totalOrders: orders?.totalDocs || orders?.total || orders?.pagination?.total || orders?.data?.length || 0,
+    totalRevenue: (orders?.docs || orders?.data || []).reduce((acc: number, o: any) => acc + (o.totalAmount || 0), 0),
   };
 }
 
 export default function AdminDashboard() {
+  const { accessToken } = useAuthStore();
+
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-stats"],
-    queryFn: fetchAdminStats,
+    queryKey: ["admin-stats", accessToken],
+    queryFn: () => fetchAdminStats(accessToken),
+    enabled: !!accessToken,
   });
 
   if (isLoading) {

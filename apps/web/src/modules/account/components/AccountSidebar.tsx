@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { User, Package, Settings, LogOut } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 const navItems = [
   { href: "/account", label: "Dashboard", icon: User },
@@ -15,7 +15,7 @@ const navItems = [
 
 export function AccountSidebar() {
   const pathname = usePathname();
-  const { user, logout } = useAuthStore();
+  const { user, clearAuth } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -69,7 +69,7 @@ export function AccountSidebar() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => logout()}
+              onClick={() => clearAuth()}
               className="text-muted-foreground hover:text-destructive shrink-0 ml-2"
               title="Sign out"
             >

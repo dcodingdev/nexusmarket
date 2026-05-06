@@ -3,7 +3,7 @@ import { Order } from "./order.model.js";
 import axios from "axios";
 import logger from "@repo/logger";
 
-const STOCK_SERVICE_URL = process.env.STOCK_SERVICE_URL || "http://localhost:4002/api/stock";
+const STOCK_SERVICE_URL = process.env.STOCK_SERVICE_URL || "http://product-service:4002/api/stock";
 
 export const createOrder = async (req: Request, res: Response) => {
   // Track successful reservations to roll back if a later item fails

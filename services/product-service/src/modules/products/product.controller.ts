@@ -372,8 +372,13 @@ export const createProduct = async (req: Request, res: Response) => {
 
     const fileData = (req as any).fileData;
 
-    const mainImage = fileData?.mainImage?.[0] || { url: "", localPath: "" };
+    // Handle both direct multipart upload and pre-uploaded URL from frontend
+    const mainImage = fileData?.mainImage?.[0] || 
+                     (req.body.imageUrl ? { url: req.body.imageUrl, localPath: "pre-uploaded" } : { url: "", localPath: "" });
+    
     const subImages = fileData?.subImages || [];
+
+    logger.debug({ body: req.body, mainImage }, "Creating product with data");
 
     const product = await Product.create({
       ...req.body,
@@ -381,6 +386,7 @@ export const createProduct = async (req: Request, res: Response) => {
       mainImage,
       subImages,
     });
+
 
     await Stock.create({
       productId: product._id,
@@ -501,8 +507,14 @@ export const updateProduct = async (req: Request, res: Response) => {
     const fileData = (req as any).fileData;
     const { vendor, ...updateData } = req.body;
 
-    if (fileData?.mainImage) updateData.mainImage = fileData.mainImage[0];
+    if (fileData?.mainImage) {
+      updateData.mainImage = fileData.mainImage[0];
+    } else if (req.body.imageUrl) {
+      updateData.mainImage = { url: req.body.imageUrl, localPath: "pre-uploaded" };
+    }
+
     if (fileData?.subImages) updateData.subImages = fileData.subImages;
+
 
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
@@ -602,11 +614,15 @@ export const exportProducts = async (req: Request, res: Response) => {
     logger.info(route);
 
     // Only allow vendors to export their own products, or admins to export any
-    const vendorId = req.query.vendorId as string;
+    let vendorId = req.query.vendorId as string;
     const ids = req.query.ids as string | string[];
 
     const isAdmin = req.user?.role === UserRole.ADMIN;
     const isVendor = req.user?.role === UserRole.VENDOR;
+
+    if (!vendorId && isVendor) {
+      vendorId = req.user?._id as string;
+    }
 
     if (!isAdmin && isVendor && vendorId !== req.user?._id) {
       logger.warn(`${route} - Unauthorized export attempt`);

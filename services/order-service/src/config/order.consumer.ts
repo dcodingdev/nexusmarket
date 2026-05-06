@@ -3,7 +3,7 @@ import { Order } from "../modules/order.model.js"; // Adjust path as needed
 import axios from "axios";
 import logger from "@repo/logger";
 
-const STOCK_SERVICE_URL = process.env.STOCK_SERVICE_URL || "http://localhost:4002/api/v1/stock";
+const STOCK_SERVICE_URL = process.env.STOCK_SERVICE_URL || "http://product-service:4002/api/stock";
 
 export const initOrderConsumers = async () => {
   const queueName = "order-service-queue";

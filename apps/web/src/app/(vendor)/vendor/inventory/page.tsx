@@ -33,14 +33,17 @@ import { cn } from '@/lib/utils';
 
 import { DataTableSkeleton } from '@/modules/vendor/components/DataTableSkeleton';
 
+import { useAuthStore } from '@/store/useAuthStore';
+
 export default function InventoryPage() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   
-  // Hardcoded vendor ID for current phase (Mocking session)
-  const vendorId = "v_123"; 
+  const { user } = useAuthStore();
+  const vendorId = user?._id || "v_123"; 
   const { data, isLoading, error } = useVendorProducts(vendorId);
   const { createProduct, updateProduct, deleteProduct } = useProductMutations();
+
   const products = data?.docs || [];
   const { selectedIds, toggle, selectAll, clear, isSelected, count } = useSelection();
 

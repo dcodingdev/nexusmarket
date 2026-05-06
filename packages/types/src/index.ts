@@ -1,4 +1,9 @@
-// This acts as the gatekeeper for your types
-export * from './user.js';
-export * from './chat.types.js';
-// Note: Use .js extension here because you are using module: NodeNext
+export { UserRole, type User, type AuthUser, type AuthResponse } from './user';
+export type {
+  ChatMessage,
+  Conversation,
+  SocketServerToClientEvents,
+  SocketClientToServerEvents,
+  TypingPayload,
+  ReadReceiptPayload
+} from './chat.types';

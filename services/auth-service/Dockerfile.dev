@@ -29,15 +29,15 @@ COPY services/product-service/package.json ./services/product-service/
 # 3. Install dependencies
 # We use --no-frozen-lockfile in dev to handle minor version mismatches 
 # caused by the container's Linux environment vs your Windows host.
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --no-frozen-lockfile --shamefully-hoist
 
-# 4. Copy the rest of the source code 
-# (Note: In docker-compose, these will be overridden by your volume mounts,
-# but we need them here for the build to be valid)
-COPY . .
+# 3. Copy the source code for the shared packages
+COPY packages/ ./packages/
 
-# 5. Set the working directory to the specific service
+# 4. Set the working directory to the specific service
 WORKDIR /app/services/auth-service
+# Note: We don't COPY the service source because it's handled by Docker Volumes in dev
+
 
 EXPOSE 4001
 

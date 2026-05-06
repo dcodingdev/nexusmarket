@@ -1,3 +1,5 @@
+"use client";
+
 import { useAuthStore } from '../store/useAuthStore';
 import { authClient } from '../lib/auth';
 import { LoginInput, RegisterInput } from '@repo/api-contracts';
@@ -12,12 +14,23 @@ export const useAuth = () => {
   const router = useRouter();
   const { user, accessToken, isAuthenticated, setAuth, clearAuth } = useAuthStore();
 
+  const getRedirectPath = (role: string) => {
+    switch (role?.toUpperCase()) {
+      case 'ADMIN':
+        return '/admin';
+      case 'VENDOR':
+        return '/vendor';
+      default:
+        return '/';
+    }
+  };
+
   const login = async (credentials: LoginInput) => {
     try {
       const { user, accessToken } = await authClient.login(credentials);
       setAuth(user, accessToken);
       toast.success(`Welcome back, ${user.name}!`);
-      router.push('/');
+      router.push(getRedirectPath(user.role));
     } catch (error: any) {
       toast.error(error.message || 'Login failed');
       throw error;

@@ -15,20 +15,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useAuthStore } from "@/store/useAuthStore";
+import React from "react";
 
-async function fetchUsers(search = "") {
-  const token = localStorage.getItem("token");
+async function fetchUsers(token: string | null, search = "") {
+  if (!token) return null;
   const url = search 
-    ? `http://localhost:4001/api/v1/users?search=${search}` 
-    : `http://localhost:4001/api/v1/users`;
+    ? `http://localhost:8000/api/v1/users?search=${search}` 
+    : `http://localhost:8000/api/v1/users`;
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) throw new Error("Failed to fetch users");
   return res.json();
 }
 
-async function toggleSuspension(userId: string) {
-  const token = localStorage.getItem("token");
-  const res = await fetch(`http://localhost:4001/api/v1/users/${userId}/suspend`, {
+async function toggleSuspension(userId: string, token: string | null) {
+  if (!token) throw new Error("Unauthorized");
+  const res = await fetch(`http://localhost:8000/api/v1/users/${userId}/suspend`, {
     method: "PATCH",
     headers: { Authorization: `Bearer ${token}` }
   });
@@ -39,14 +41,16 @@ async function toggleSuspension(userId: string) {
 export default function UserManagementPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = React.useState("");
+  const { accessToken } = useAuthStore();
   
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-users", search],
-    queryFn: () => fetchUsers(search),
+    queryKey: ["admin-users", search, accessToken],
+    queryFn: () => fetchUsers(accessToken, search),
+    enabled: !!accessToken,
   });
 
   const mutation = useMutation({
-    mutationFn: toggleSuspension,
+    mutationFn: (userId: string) => toggleSuspension(userId, accessToken),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       toast.success(data.message);
@@ -153,7 +157,6 @@ export default function UserManagementPage() {
   );
 }
 
-import React from "react";
 function cn(...inputs: any[]) {
   return inputs.filter(Boolean).join(" ");
 }

@@ -163,16 +163,31 @@ export const uploadToImageKit = async (
   res: Response,
   next: NextFunction
 ) => {
-  if (!req.files) return next();
+  if (!req.files && !req.file) return next();
 
   try {
-    const files = req.files as {
-      [fieldname: string]: Express.Multer.File[];
-    };
-
     const fileData: any = {
       mainImage: [],
       subImages: [],
+    };
+
+    /**
+     * Handle Single File (req.file)
+     */
+    if (req.file) {
+      const result = await uploadSingleToIK(req.file, "/uploads");
+      (req as any).fileData = {
+        ...fileData,
+        [req.file.fieldname]: [result],
+      };
+      return next();
+    }
+
+    /**
+     * Handle Multiple Files (req.files)
+     */
+    const files = req.files as {
+      [fieldname: string]: Express.Multer.File[];
     };
 
     /**
@@ -203,6 +218,7 @@ export const uploadToImageKit = async (
     (req as any).fileData = fileData;
 
     next();
+
   } catch (error: any) {
     logger.error(
       `ImageKit Multi-Upload Error: ${error.message}`

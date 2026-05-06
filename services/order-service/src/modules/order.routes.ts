@@ -50,15 +50,6 @@ router.route("/verify-purchase/:productId")
    */
   .get(orderController.verifyPurchase);
 
-
-router.route("/:id")
-  /**
-   * @route   GET /api/v1/orders/:id
-   * @desc    Get details of a specific order
-   * @access  Private (Owner or Admin)
-   */
-  .get(orderController.getOrderById);
-
 /**
  * Optional: Admin-only route to see all orders across the platform
  */
@@ -67,5 +58,13 @@ router.route("/all")
     authorize([UserRole.ADMIN]),
     orderController.getAllOrders 
   );
+
+router.route("/:id")
+  /**
+   * @route   GET /api/v1/orders/:id
+   * @desc    Get details of a specific order
+   * @access  Private (Owner or Admin)
+   */
+  .get(orderController.getOrderById);
 
 export default router;

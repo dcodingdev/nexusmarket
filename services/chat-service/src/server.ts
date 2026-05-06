@@ -33,9 +33,14 @@ app.use("/api/chat", router);
 const start = async () => {
   try {
     // Connect to clients
-    await connectDatabase(process.env.MONGO_URI!);
+    const mongoUri = process.env.CHAT_MONGO_URI || process.env.MONGO_URI;
+    if (!mongoUri) throw new Error("CHAT_MONGO_URI or MONGO_URI is not defined");
+    await connectDatabase(mongoUri);
     await getMongoClient();
-    await connectRedis();
+    await connectRedis().catch(err => {
+      logger.error({ err }, "⚠️ Redis connection failed, some chat features may be limited");
+    });
+
 
     // Mount Modules
     app.use("/api/chat/conversations", conversationRoutes);

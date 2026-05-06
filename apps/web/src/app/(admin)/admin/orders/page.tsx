@@ -7,9 +7,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
-async function fetchAllOrders() {
-  const token = localStorage.getItem("token");
-  const res = await fetch("http://localhost:4001/api/v1/orders/all", {
+import { useAuthStore } from "@/store/useAuthStore";
+
+async function fetchAllOrders(token: string | null) {
+  if (!token) return null;
+  const res = await fetch("http://localhost:8000/api/v1/orders/all", {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error("Failed to fetch all orders");
@@ -17,9 +19,11 @@ async function fetchAllOrders() {
 }
 
 export default function AdminOrderFeedPage() {
+  const { accessToken } = useAuthStore();
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-orders-all"],
-    queryFn: fetchAllOrders,
+    queryKey: ["admin-orders-all", accessToken],
+    queryFn: () => fetchAllOrders(accessToken),
+    enabled: !!accessToken,
   });
 
   const orders = data?.docs || [];

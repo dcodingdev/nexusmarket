@@ -1,4 +1,5 @@
 import { mongoose, Schema, Document } from "@repo/database";
+import aggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 export interface IOrderItem {
   product: mongoose.Types.ObjectId;
@@ -48,6 +49,8 @@ const orderSchema = new Schema<IOrder>(
     toObject: { virtuals: true }
   }
 );
+
+orderSchema.plugin(aggregatePaginate);
 
 export const Order = mongoose.model<IOrder, mongoose.AggregatePaginateModel<IOrder>>(
   "Order", 

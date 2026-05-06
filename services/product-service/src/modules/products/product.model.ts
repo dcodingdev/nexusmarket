@@ -66,7 +66,7 @@ import { mongoose, Schema, Document, AggregatePaginateModel } from "@repo/databa
 export interface IProduct extends Document {
   name: string;
   description: string;
-  category: mongoose.Types.ObjectId;
+  category: string;
 
   vendor: {
     id: mongoose.Types.ObjectId;
@@ -93,11 +93,11 @@ const productSchema = new Schema<IProduct>(
     description: { type: String, required: true },
 
     category: { 
-      type: Schema.Types.ObjectId, 
-      ref: "Category", // OK if Category is within same service
+      type: String, 
       required: true, 
       index: true 
     },
+
 
     // ✅ Vendor snapshot (decoupled from auth-service)
     vendor: {

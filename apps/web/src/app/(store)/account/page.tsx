@@ -53,7 +53,7 @@ export default function AccountDashboardPage() {
           </div>
           <div>
             <p className="text-sm font-medium text-muted-foreground">Addresses</p>
-            <h3 className="text-2xl font-bold">{user?.address ? "1" : "0"}</h3>
+            <h3 className="text-2xl font-bold">{(user as any)?.address ? "1" : "0"}</h3>
           </div>
         </div>
 

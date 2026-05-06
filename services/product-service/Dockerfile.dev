@@ -23,7 +23,7 @@ COPY services/payment-service/package.json ./services/payment-service/
 COPY services/product-service/package.json ./services/product-service/
 
 # Now run install (it will find @repo/auth-service now)
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --no-frozen-lockfile --shamefully-hoist
 
 # 3. Copy the source code for the shared packages
 COPY packages/ ./packages/

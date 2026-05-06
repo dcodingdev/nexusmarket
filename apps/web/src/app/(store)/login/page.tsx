@@ -1,10 +1,13 @@
 'use client';
 
+import { useEffect } from 'react';
+
 import { useAuth } from '@/hooks/useAuth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { LogIn, Mail, Lock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +21,18 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
+  const router = useRouter();
+  
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const role = user.role?.toUpperCase();
+      if (role === 'ADMIN') router.push('/admin');
+      else if (role === 'VENDOR') router.push('/vendor');
+      else router.push('/');
+    }
+  }, [isAuthenticated, user, router]);
+
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },

@@ -3,7 +3,7 @@ import { Review } from "./review.model.js";
 import { Product } from "../products/product.model.js";
 import logger from "@repo/logger";
 
-const ORDER_SERVICE_URL = process.env.ORDER_SERVICE_URL || "http://localhost:4003/api/v1/orders";
+const ORDER_SERVICE_URL = process.env.ORDER_SERVICE_URL || "http://order-service:4003/api/orders";
 
 export const createReview = async (req: Request, res: Response) => {
   try {

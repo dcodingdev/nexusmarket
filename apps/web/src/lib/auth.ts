@@ -1,7 +1,8 @@
-import { AuthResponse, LoginInput, RegisterInput } from '@repo/api-contracts';
+import { LoginInput, RegisterInput } from '@repo/api-contracts';
 import { User } from '@repo/types';
 
-const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:4001/api/auth';
+const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:8000/api/v1/auth';
+
 
 /**
  * Authentication Client
