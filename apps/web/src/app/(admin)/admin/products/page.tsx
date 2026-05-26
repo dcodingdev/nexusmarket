@@ -18,24 +18,16 @@ import { toast } from "sonner";
 import { useAuthStore } from "@/store/useAuthStore";
 import React from "react";
 
-async function fetchAllProducts(token: string | null, search = "") {
-  if (!token) return null;
-  const url = search 
-    ? `http://localhost:8000/api/v1/products?search=${search}` 
-    : `http://localhost:8000/api/v1/products`;
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-  if (!res.ok) throw new Error("Failed to fetch products");
-  return res.json();
+import { apiClient } from "@/core/api/client";
+
+async function fetchAllProducts(search = "") {
+  return apiClient<any>("/products" + (search ? `?search=${search}` : ""));
 }
 
-async function togglePublish(productId: string, token: string | null) {
-  if (!token) throw new Error("Unauthorized");
-  const res = await fetch(`http://localhost:8000/api/v1/products/${productId}/publish`, {
+async function togglePublish(productId: string) {
+  return apiClient<any>(`/products/${productId}/publish`, {
     method: "PATCH",
-    headers: { Authorization: `Bearer ${token}` }
   });
-  if (!res.ok) throw new Error("Failed to toggle visibility");
-  return res.json();
 }
 
 export default function ProductOversightPage() {
@@ -45,12 +37,12 @@ export default function ProductOversightPage() {
   
   const { data, isLoading } = useQuery({
     queryKey: ["admin-products", search, accessToken],
-    queryFn: () => fetchAllProducts(accessToken, search),
+    queryFn: () => fetchAllProducts(search),
     enabled: !!accessToken,
   });
 
   const mutation = useMutation({
-    mutationFn: (productId: string) => togglePublish(productId, accessToken),
+    mutationFn: (productId: string) => togglePublish(productId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       toast.success("Product visibility updated");

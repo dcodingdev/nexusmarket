@@ -343,6 +343,7 @@
 
 
 import { Request, Response } from "express";
+import { mongoose } from "@repo/database";
 import { Product } from "./product.model.js";
 import logger from "@repo/logger";
 import { Stock } from "../stock/stock.model.js";
@@ -436,7 +437,11 @@ export const getAllProducts = async (req: Request, res: Response) => {
     const query: any = { isDraft: false };
 
     if (category) query.category = category;
-    if (vendor) query["vendor.id"] = vendor;
+    if (vendor) {
+      query["vendor.id"] = mongoose.Types.ObjectId.isValid(vendor as string)
+        ? new mongoose.Types.ObjectId(vendor as string)
+        : vendor;
+    }
     if (search) query.name = { $regex: search, $options: "i" };
 
     const aggregate = Product.aggregate([{ $match: query }]);
@@ -452,6 +457,47 @@ export const getAllProducts = async (req: Request, res: Response) => {
     res.status(200).json({ success: true, ...result });
   } catch (error: any) {
     logger.error(`${route} - Fetch failed: ${error.message}`);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * GET VENDOR PRODUCTS
+ */
+export const getVendorProducts = async (req: Request, res: Response) => {
+  const route = logRoute(req);
+
+  try {
+    logger.info(route);
+
+    const { vendorId } = req.params;
+    const { page = 1, limit = 20 } = req.query;
+
+    if (req.user?.role !== UserRole.ADMIN && req.user?._id !== vendorId) {
+      logger.warn(`${route} - Unauthorized attempt by user ${req.user?._id} to access products of vendor ${vendorId}`);
+      return res.status(403).json({ success: false, message: "Forbidden" });
+    }
+
+    const query: any = {};
+    if (mongoose.Types.ObjectId.isValid(vendorId)) {
+      query["vendor.id"] = new mongoose.Types.ObjectId(vendorId);
+    } else {
+      query["vendor.id"] = vendorId;
+    }
+
+    const aggregate = Product.aggregate([{ $match: query }]);
+
+    const result = await (Product as any).aggregatePaginate(aggregate, {
+      page: Number(page),
+      limit: Number(limit),
+      sort: { createdAt: -1 },
+    });
+
+    logger.info(`${route} - Fetched ${result.docs.length} products for vendor ${vendorId}`);
+
+    res.status(200).json({ success: true, ...result });
+  } catch (error: any) {
+    logger.error(`${route} - Fetch vendor products failed: ${error.message}`);
     res.status(500).json({ success: false, message: error.message });
   }
 };

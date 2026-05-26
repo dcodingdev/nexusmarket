@@ -4,7 +4,11 @@ import React from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@repo/types';
-import { notFound } from 'next/navigation';
+import { notFound, useRouter } from 'next/navigation';
+import { apiClient } from '@/core/api/client';
+import { authClient } from '@/lib/auth';
+import { useAuthStore } from '@/store/useAuthStore';
+import { toast } from 'sonner';
 
 interface RoleGuardProps {
   children: React.ReactNode;
@@ -20,6 +24,8 @@ interface RoleGuardProps {
 export const RoleGuard = ({ children, role, fallback }: RoleGuardProps) => {
   const { user, isAuthenticated, role: userRole } = useAuth();
   const [mounted, setMounted] = React.useState(false);
+  const [isUpgrading, setIsUpgrading] = React.useState(false);
+  const router = useRouter();
 
   React.useEffect(() => {
     setMounted(true);
@@ -35,6 +41,34 @@ export const RoleGuard = ({ children, role, fallback }: RoleGuardProps) => {
     return notFound();
   }
 
+  // Handle vendor upgrade
+  const handleUpgrade = async () => {
+    setIsUpgrading(true);
+    try {
+      // 1. Update user role to vendor on backend database
+      const updatedUser = await apiClient<any>("/users/profile", {
+        method: "PATCH",
+        body: JSON.stringify({ role: "vendor" }),
+      });
+
+      // 2. Trigger session refresh to sign new access token with the updated role
+      const refreshData = await authClient.refresh();
+
+      // 3. Update local Zustand state
+      useAuthStore.getState().setAuth(updatedUser, refreshData.accessToken);
+
+      toast.success("Account upgraded to Vendor successfully!");
+      
+      // 4. Force hard redirect to reload dashboard route guard state
+      window.location.href = "/vendor";
+    } catch (err: any) {
+      console.error("Upgrade to vendor failed:", err);
+      toast.error(err.message || "Failed to upgrade account. Please try again.");
+    } finally {
+      setIsUpgrading(false);
+    }
+  };
+
   // Show fallback (e.g. Upgrade CTA) for Vendor routes if user is a Customer
   if (role === UserRole.VENDOR && userRole !== UserRole.VENDOR) {
     return fallback || (
@@ -46,8 +80,19 @@ export const RoleGuard = ({ children, role, fallback }: RoleGuardProps) => {
           Want to sell on NexusMarket? Upgrade your account to open a vendor dashboard and start listing products in minutes.
         </p>
         <div className="flex justify-center gap-4">
-          <button className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 dark:shadow-none transition-all hover:scale-105 active:scale-95">
-            Upgrade to Vendor
+          <button 
+            onClick={handleUpgrade}
+            disabled={isUpgrading}
+            className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 dark:shadow-none transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+          >
+            {isUpgrading ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Upgrading...
+              </>
+            ) : (
+              "Upgrade to Vendor"
+            )}
           </button>
           <button className="px-8 py-4 border border-gray-200 dark:border-gray-800 rounded-xl font-bold hover:bg-gray-50 dark:hover:bg-gray-900 transition-all">
             Learn More

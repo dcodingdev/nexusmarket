@@ -10,7 +10,8 @@ import {
   Settings,
   ShieldCheck,
   Menu,
-  LogOut
+  LogOut,
+  ShoppingBag
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -63,7 +64,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             })}
           </nav>
 
-          <div className="p-4 border-t">
+          <div className="p-4 border-t space-y-2">
+            <Link href="/" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+              <ShoppingBag className="w-4 h-4 text-indigo-500" />
+              View Storefront
+            </Link>
             <Button 
               variant="ghost" 
               className="w-full justify-start gap-3 text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
@@ -83,9 +88,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <ShieldCheck className="w-5 h-5 text-primary" />
               <span className="font-bold tracking-tight">Admin</span>
             </div>
-            <Button variant="ghost" size="icon">
-              <Menu className="w-5 h-5" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Link href="/" className="text-xs font-semibold px-3 py-1.5 border rounded-lg hover:bg-muted transition-colors flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+                <ShoppingBag className="w-3.5 h-3.5 text-indigo-500" />
+                <span>View Store</span>
+              </Link>
+              <Button variant="ghost" size="icon">
+                <Menu className="w-5 h-5" />
+              </Button>
+            </div>
           </header>
 
           <div className="flex-1 overflow-y-auto">

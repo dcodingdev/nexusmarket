@@ -22,7 +22,7 @@ export const initOrderConsumers = async () => {
 
       if (order) {
         for (const item of order.items) {
-          await axios.post(`${STOCK_SERVICE_URL}/confirm-sale/${item.product}`, {
+          await axios.post(`${STOCK_SERVICE_URL}/${item.product}/confirm`, {
             amount: item.quantity,
           });
         }

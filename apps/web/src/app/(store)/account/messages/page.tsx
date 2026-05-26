@@ -7,7 +7,7 @@ import { useConversations } from "@/hooks/useConversations";
 import { MessageSquare } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
-export default function VendorChatPage() {
+export default function CustomerMessagesPage() {
   const { accessToken, user } = useAuth();
   const token = accessToken || "";
   const currentUserId = user?._id || "";
@@ -50,7 +50,7 @@ export default function VendorChatPage() {
               Select a conversation
             </h2>
             <p className="text-sm text-muted-foreground max-w-sm">
-              Choose a conversation from the sidebar list to start messaging with the customer.
+              Choose a conversation from the sidebar list to view your messages.
             </p>
           </div>
         )}

@@ -7,7 +7,7 @@ import * as z from "zod";
 import { Star, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import axios from "axios";
+import { apiClient } from "@/core/api/client";
 
 const reviewSchema = z.object({
   rating: z.number().min(1, "Please select a rating").max(5),
@@ -15,8 +15,6 @@ const reviewSchema = z.object({
 });
 
 type ReviewFormValues = z.infer<typeof reviewSchema>;
-
-const PRODUCT_SERVICE_URL = process.env.NEXT_PUBLIC_PRODUCT_SERVICE_URL || "http://localhost:4002/api";
 
 interface ReviewFormProps {
   productId: string;
@@ -49,16 +47,15 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
     setIsSubmitting(true);
     setError("");
     try {
-      await axios.post(
-        `${PRODUCT_SERVICE_URL}/products/${productId}/reviews`,
-        data,
-        { withCredentials: true }
-      );
+      await apiClient<any>(`/products/${productId}/reviews`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
       setSuccess(true);
       if (onSuccess) onSuccess();
     } catch (err: any) {
       setError(
-        err.response?.data?.message || "Failed to submit review. Are you a verified purchaser?"
+        err.message || "Failed to submit review. Are you a verified purchaser?"
       );
     } finally {
       setIsSubmitting(false);

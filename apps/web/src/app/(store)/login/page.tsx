@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { LogIn, Mail, Lock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,18 +20,23 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+function LoginContent() {
   const { login, isAuthenticated, user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  const redirect = searchParams.get('redirect');
+  const safeRedirect = redirect && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : null;
   
   useEffect(() => {
     if (isAuthenticated && user) {
       const role = user.role?.toUpperCase();
       if (role === 'ADMIN') router.push('/admin');
       else if (role === 'VENDOR') router.push('/vendor');
+      else if (safeRedirect) router.push(safeRedirect);
       else router.push('/');
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, safeRedirect]);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -40,6 +45,38 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormValues) => {
     await login(data);
+  };
+
+  const handleDemoLogin = async (role: 'customer' | 'vendor' | 'admin') => {
+    const accounts = {
+      admin: { email: 'admin@nexusmarket.com', password: 'admin123', name: 'Nexus Admin', role: 'admin' },
+      vendor: { email: 'vendor@nexusmarket.com', password: 'password123', name: 'Nexus Vendor', role: 'vendor' },
+      customer: { email: 'customer@nexusmarket.com', password: 'password123', name: 'Nexus Customer', role: 'customer' }
+    };
+    const account = accounts[role];
+    form.setValue('email', account.email);
+    form.setValue('password', account.password);
+    
+    try {
+      await login({ email: account.email, password: account.password });
+    } catch (err: any) {
+      if (role !== 'admin') {
+        try {
+          const regRes = await fetch('http://localhost:8000/api/v1/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(account),
+          });
+          if (regRes.ok) {
+            await login({ email: account.email, password: account.password });
+            return;
+          }
+        } catch (regErr) {
+          console.error(regErr);
+        }
+      }
+      form.setError('root', { message: err.message || 'Login failed' });
+    }
   };
 
   return (
@@ -116,23 +153,57 @@ export default function LoginPage() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+              <span className="bg-card px-2 text-muted-foreground">Demo Quick Login</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="h-12 rounded-xl">Google</Button>
-            <Button variant="outline" className="h-12 rounded-xl">GitHub</Button>
+          <div className="grid grid-cols-3 gap-2">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => handleDemoLogin('customer')}
+              className="text-[10px] h-10 px-1 font-bold border-indigo-500/20 hover:bg-indigo-500/5 hover:border-indigo-500/40 transition-all rounded-xl"
+            >
+              👤 Customer
+            </Button>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => handleDemoLogin('vendor')}
+              className="text-[10px] h-10 px-1 font-bold border-violet-500/20 hover:bg-violet-500/5 hover:border-violet-500/40 transition-all rounded-xl"
+            >
+              🏪 Vendor
+            </Button>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => handleDemoLogin('admin')}
+              className="text-[10px] h-10 px-1 font-bold border-blue-500/20 hover:bg-blue-500/5 hover:border-blue-500/40 transition-all rounded-xl"
+            >
+              🔑 Admin
+            </Button>
           </div>
         </div>
 
         <p className="text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{' '}
-          <Link href="/register" className="text-primary font-bold hover:underline">
+          <Link href={safeRedirect ? `/register?redirect=${encodeURIComponent(safeRedirect)}` : "/register"} className="text-primary font-bold hover:underline">
             Create an account
           </Link>
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[80vh] flex items-center justify-center p-4">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User, Package, Settings, LogOut } from "lucide-react";
+import { User, Package, Settings, LogOut, ShoppingBag, MessageSquare } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 const navItems = [
   { href: "/account", label: "Dashboard", icon: User },
   { href: "/account/orders", label: "Order History", icon: Package },
+  { href: "/account/messages", label: "Messages", icon: MessageSquare },
   { href: "/account/profile", label: "Profile & Addresses", icon: Settings },
 ];
 
@@ -49,6 +50,16 @@ export function AccountSidebar() {
             </Link>
           );
         })}
+
+        <div className="pt-4 mt-4 border-t border-border">
+          <Link
+            href="/"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            <ShoppingBag className="h-4 w-4 shrink-0 text-indigo-500" />
+            <span>View Storefront</span>
+          </Link>
+        </div>
       </div>
 
       <div className="p-4 border-t border-border">

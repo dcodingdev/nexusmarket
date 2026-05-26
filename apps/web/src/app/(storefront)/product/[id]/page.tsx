@@ -2,7 +2,7 @@
 
 import { useProduct } from '@/modules/products/hooks/useProducts';
 import Image from 'next/image';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { ShoppingCart, ArrowLeft, Store } from 'lucide-react';
 import Link from 'next/link';
 
@@ -10,13 +10,17 @@ import { Button } from '@/components/ui/button';
 
 import { useCartStore } from '@/stores/cart-store';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
+import { useChatUIStore } from '@/store/useChatUIStore';
+import { apiClient } from '@/core/api/client';
+import { MessageSquare } from 'lucide-react';
 
 export default function ProductDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const { data, isLoading, error } = useProduct(id);
   const addItem = useCartStore((state) => state.addItem);
-
+  const router = useRouter();
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 animate-pulse">
@@ -44,6 +48,8 @@ export default function ProductDetailPage() {
   }
 
   const product = data.data;
+  const { isAuthenticated } = useAuth();
+  const { openChat } = useChatUIStore();
 
   const handleAddToCart = () => {
     addItem({
@@ -55,6 +61,32 @@ export default function ProductDetailPage() {
       image: product.mainImage.url,
     });
     toast.success(`${product.name} added to cart!`);
+    router.push('/checkout');
+  };
+
+  const handleChatWithVendor = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to message the seller.");
+      router.push(`/login?redirect=/product/${product._id}`);
+      return;
+    }
+
+    const toastId = toast.loading("Opening chat with seller...");
+    try {
+      const res = await apiClient<any>("/chat/conversations", {
+        method: "POST",
+        body: JSON.stringify({
+          title: `Inquiry: ${product.name}`,
+          participantIds: [product.vendor.id],
+        }),
+      });
+
+      toast.success("Connected with seller!", { id: toastId });
+      openChat(res.data.id);
+    } catch (error: any) {
+      toast.error(error.message || "Could not connect to seller.", { id: toastId });
+      console.error(error);
+    }
   };
 
   return (
@@ -97,12 +129,23 @@ export default function ProductDetailPage() {
           <div className="mt-auto space-y-4">
             <Button 
               size="lg" 
-              className="flex w-full items-center justify-center gap-2 rounded-xl text-base font-semibold shadow-lg transition-transform hover:scale-[1.02] active:scale-95"
+              className="flex w-full items-center justify-center gap-2 rounded-xl text-base font-semibold shadow-lg transition-transform hover:scale-[1.02] active:scale-95 bg-primary text-primary-foreground"
               onClick={handleAddToCart}
             >
               <ShoppingCart className="h-5 w-5" />
               Add to Cart
             </Button>
+            
+            <Button 
+              variant="outline"
+              size="lg" 
+              className="flex w-full items-center justify-center gap-2 rounded-xl text-base font-semibold transition-transform hover:scale-[1.02] active:scale-95 border-border hover:bg-muted"
+              onClick={handleChatWithVendor}
+            >
+              <MessageSquare className="h-5 w-5 text-indigo-500" />
+              Chat with Seller
+            </Button>
+
             <p className="text-center text-xs text-muted-foreground">
               Secure payment processing. Worldwide shipping available.
             </p>

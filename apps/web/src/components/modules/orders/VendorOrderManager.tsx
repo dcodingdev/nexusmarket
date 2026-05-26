@@ -9,27 +9,17 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
+import { apiClient } from "@/core/api/client";
+
 async function fetchVendorOrders() {
-  const token = localStorage.getItem("token");
-  const res = await fetch("http://localhost:4001/api/v1/orders/vendor", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) throw new Error("Failed to fetch vendor orders");
-  return res.json();
+  return apiClient<any>("/orders/vendor");
 }
 
 async function updateItemStatus({ orderId, productId, status }: { orderId: string, productId: string, status: string }) {
-  const token = localStorage.getItem("token");
-  const res = await fetch(`http://localhost:4001/api/v1/orders/${orderId}/items/${productId}/status`, {
+  return apiClient<any>(`/orders/${orderId}/items/${productId}/status`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
     body: JSON.stringify({ status }),
   });
-  if (!res.ok) throw new Error("Failed to update status");
-  return res.json();
 }
 
 export default function VendorOrderManager() {

@@ -11,6 +11,7 @@ let io: TypedServer | null = null;
 
 export function createSocketServer(httpServer: HttpServer): TypedServer {
   const socketIo = new Server(httpServer, {
+    path: "/api/chat/socket.io",
     cors: {
       origin: process.env.FRONTEND_URL || "http://localhost:3000",
       credentials: true,

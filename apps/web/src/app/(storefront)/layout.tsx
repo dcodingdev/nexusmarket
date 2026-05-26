@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { User, LogOut, LayoutDashboard } from "lucide-react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, logout, user, accessToken } = useAuth();
 
   return (
     <>
@@ -30,7 +30,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   <Link href="/admin">
                     <Button variant="ghost" size="sm" className="gap-2">
                       <LayoutDashboard className="w-4 h-4" />
-                      Dashboard
+                      Admin
+                    </Button>
+                  </Link>
+                )}
+                {user?.role?.toUpperCase() === 'VENDOR' && (
+                  <Link href="/vendor">
+                    <Button variant="ghost" size="sm" className="gap-2">
+                      <LayoutDashboard className="w-4 h-4" />
+                      Vendor
+                    </Button>
+                  </Link>
+                )}
+                {user?.role?.toUpperCase() === 'CUSTOMER' && (
+                  <Link href="/account">
+                    <Button variant="ghost" size="sm" className="gap-2">
+                      <User className="w-4 h-4" />
+                      Account
                     </Button>
                   </Link>
                 )}
@@ -58,11 +74,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           &copy; {new Date().getFullYear()} NexusMarket. All rights reserved.
         </div>
       </footer>
-      <ChatBubble
-        conversationId={undefined}
-        token={undefined}
-        currentUserId={undefined}
-      />
+      {isAuthenticated && (
+        <ChatBubble
+          token={accessToken ?? undefined}
+          currentUserId={user?._id}
+        />
+      )}
     </>
   );
 }

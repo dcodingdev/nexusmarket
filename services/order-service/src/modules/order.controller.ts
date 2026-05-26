@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Order } from "./order.model.js";
+import { mongoose } from "@repo/database";
 import axios from "axios";
 import logger from "@repo/logger";
 
@@ -81,7 +82,12 @@ export const getMyOrders = async (req: Request, res: Response) => {
     const { page = 1, limit = 10 } = req.query;
 
     // Using aggregatePaginate as defined in your model
-    const query = { customer: userId };
+    const query: any = {};
+    if (userId) {
+      query.customer = mongoose.Types.ObjectId.isValid(userId)
+        ? new mongoose.Types.ObjectId(userId)
+        : userId;
+    }
     const aggregate = Order.aggregate([{ $match: query }, { $sort: { createdAt: -1 } }]);
 
     const result = await (Order as any).aggregatePaginate(aggregate, {
@@ -122,7 +128,12 @@ export const getVendorOrders = async (req: Request, res: Response) => {
     const { page = 1, limit = 10 } = req.query;
 
     // Filter: at least one item has vendor matching vendorId
-    const query = { "items.vendor": vendorId };
+    const query: any = {};
+    if (vendorId) {
+      query["items.vendor"] = mongoose.Types.ObjectId.isValid(vendorId)
+        ? new mongoose.Types.ObjectId(vendorId)
+        : vendorId;
+    }
     
     const aggregate = Order.aggregate([
       { $match: query },

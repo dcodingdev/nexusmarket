@@ -149,6 +149,18 @@ router.post(
 );
 
 /**
+ * @route   GET /api/v1/products/vendor/:vendorId
+ * @desc    Get all products belonging to a vendor (including drafts)
+ * @access  Private (Vendor, Admin)
+ */
+router.get(
+  "/vendor/:vendorId",
+  authenticate,
+  authorize([UserRole.VENDOR, UserRole.ADMIN]),
+  productController.getVendorProducts
+);
+
+/**
  * @route   GET /api/v1/products/:id
  * @desc    Get a single product by ID
  * @access  Public

@@ -11,9 +11,19 @@ import Link from 'next/link';
 
 export default function ProductsPage() {
   const [search, setSearch] = useState('');
-  const { data, isLoading, error } = useProducts({ search, limit: 20 });
+  const [page, setPage] = useState(1);
+  const limit = 4;
+
+  const { data, isLoading, error } = useProducts({ search, page, limit });
 
   const products = data?.docs || [];
+  const totalPages = data?.totalPages || 0;
+  const totalDocs = data?.totalDocs || 0;
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1); // Reset page to 1 when search query changes
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -34,7 +44,7 @@ export default function ProductsPage() {
               placeholder="Search products..." 
               className="pl-10"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
             />
           </div>
           <Button variant="outline" size="icon">
@@ -60,24 +70,94 @@ export default function ProductsPage() {
           <p className="mt-2 text-muted-foreground">Try a different search term.</p>
         </div>
       ) : (
-        <MasonryGrid>
-          {products.map((product, index) => (
-            <Link key={product._id} href={`/product/${product._id}`}>
-              <ProductCard 
-                product={{
-                  id: product._id,
-                  name: product.name,
-                  price: product.price,
-                  mainImage: product.mainImage,
-                  vendor: product.vendor
-                }} 
-                priority={index < 8}
-              />
-            </Link>
-          ))}
-        </MasonryGrid>
+        <>
+          <MasonryGrid>
+            {products.map((product, index) => (
+              <Link key={product._id} href={`/product/${product._id}`}>
+                <ProductCard 
+                  product={{
+                    id: product._id,
+                    name: product.name,
+                    price: product.price,
+                    mainImage: product.mainImage,
+                    vendor: product.vendor
+                  }} 
+                  priority={index < 8}
+                />
+              </Link>
+            ))}
+          </MasonryGrid>
+
+          {/* Pagination Controls */}
+          {totalDocs > 0 && (
+            <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 border-t pt-6">
+              <p className="text-sm text-muted-foreground">
+                Showing <span className="font-semibold">{(page - 1) * limit + 1}</span> to{" "}
+                <span className="font-semibold">
+                  {Math.min(page * limit, totalDocs)}
+                </span>{" "}
+                of <span className="font-semibold">{totalDocs}</span> products
+              </p>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={page === 1}
+                  className="rounded-xl"
+                >
+                  Previous
+                </Button>
+                
+                {/* Page number indicators */}
+                <div className="flex items-center gap-1">
+                  {[...Array(totalPages)].map((_, i) => {
+                    const pageNum = i + 1;
+                    if (
+                      pageNum === 1 ||
+                      pageNum === totalPages ||
+                      Math.abs(pageNum - page) <= 1
+                    ) {
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={page === pageNum ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setPage(pageNum)}
+                          className={`w-9 h-9 rounded-xl ${page === pageNum ? "bg-primary text-primary-foreground shadow" : ""}`}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    } else if (
+                      pageNum === 2 ||
+                      pageNum === totalPages - 1
+                    ) {
+                      return (
+                        <span key={pageNum} className="text-muted-foreground px-1 select-none">
+                          ...
+                        </span>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={page === totalPages}
+                  className="rounded-xl"
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
 }
-

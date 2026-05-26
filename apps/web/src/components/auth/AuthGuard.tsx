@@ -22,9 +22,14 @@ export const AuthGuard = ({ children, allowedRoles, fallback }: AuthGuardProps) 
 
   useEffect(() => {
     setMounted(true);
-    // If not authenticated, redirect to login
+    // If not authenticated, redirect to login with current path as redirect param
     if (!isAuthenticated) {
-      router.push('/login');
+      const currentPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '';
+      if (currentPath && !currentPath.startsWith('/login')) {
+        router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
+      } else {
+        router.push('/login');
+      }
     }
   }, [isAuthenticated, router]);
 

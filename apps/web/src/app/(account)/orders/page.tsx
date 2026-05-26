@@ -8,16 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { apiClient } from "@/core/api/client";
+
 async function fetchMyOrders() {
-  const token = localStorage.getItem("token");
-  const res = await fetch("http://localhost:4001/api/v1/orders/me", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  if (!res.ok) throw new Error("Failed to fetch orders");
-  return res.json();
+  return apiClient<any>("/orders/me");
 }
+
 
 export default function OrdersPage() {
   const { data, isLoading, error } = useQuery({

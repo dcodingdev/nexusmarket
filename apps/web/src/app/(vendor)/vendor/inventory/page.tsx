@@ -223,6 +223,7 @@ export default function InventoryPage() {
                         src={product.mainImage.url || '/placeholder.jpg'} 
                         alt={product.name}
                         fill
+                        priority
                         className="object-cover"
                       />
                     </div>

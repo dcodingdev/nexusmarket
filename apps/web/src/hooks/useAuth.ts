@@ -37,11 +37,11 @@ export const useAuth = () => {
     }
   };
 
-  const register = async (data: RegisterInput) => {
+  const register = async (data: RegisterInput, redirectTo?: string) => {
     try {
       const { user } = await authClient.register(data);
       toast.success('Registration successful! Please login.');
-      router.push('/login');
+      router.push(redirectTo ? `/login?redirect=${encodeURIComponent(redirectTo)}` : '/login');
     } catch (error: any) {
       toast.error(error.message || 'Registration failed');
       throw error;

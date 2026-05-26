@@ -18,6 +18,10 @@ export function ConversationList({
   onSelect,
   isLoading,
 }: ConversationListProps) {
+  const activeConversations = conversations.filter(
+    (conv) => conv.lastMessageAt || conv.lastMessagePreview
+  );
+
   if (isLoading) {
     return (
       <div className="flex-1 p-4 space-y-3">
@@ -31,7 +35,7 @@ export function ConversationList({
     );
   }
 
-  if (conversations.length === 0) {
+  if (activeConversations.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3 p-8 text-center">
         <MessageSquare className="h-10 w-10 text-muted-foreground/40" />
@@ -44,7 +48,7 @@ export function ConversationList({
 
   return (
     <div className="flex flex-col divide-y divide-border overflow-y-auto">
-      {conversations.map((conv) => {
+      {activeConversations.map((conv) => {
         const lastActivity = conv.lastMessageAt
           ? new Date(conv.lastMessageAt)
           : new Date(conv.updatedAt);

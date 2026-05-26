@@ -9,20 +9,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { useAuthStore } from "@/store/useAuthStore";
 
-async function fetchAllOrders(token: string | null) {
-  if (!token) return null;
-  const res = await fetch("http://localhost:8000/api/v1/orders/all", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) throw new Error("Failed to fetch all orders");
-  return res.json();
+import { apiClient } from "@/core/api/client";
+
+async function fetchAllOrders() {
+  return apiClient<any>("/orders/all");
 }
 
 export default function AdminOrderFeedPage() {
   const { accessToken } = useAuthStore();
   const { data, isLoading } = useQuery({
     queryKey: ["admin-orders-all", accessToken],
-    queryFn: () => fetchAllOrders(accessToken),
+    queryFn: () => fetchAllOrders(),
     enabled: !!accessToken,
   });
 

@@ -13,12 +13,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuthStore } from "@/store/useAuthStore";
 
-async function fetchAdminStats(token: string | null) {
-  if (!token) return null;
+import { apiClient } from "@/core/api/client";
+
+async function fetchAdminStats() {
   const [users, products, orders] = await Promise.all([
-    fetch("http://localhost:8000/api/v1/users", { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-    fetch("http://localhost:8000/api/v1/products", { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-    fetch("http://localhost:8000/api/v1/orders/all", { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+    apiClient<any>("/users"),
+    apiClient<any>("/products"),
+    apiClient<any>("/orders/all"),
   ]);
 
   return {
@@ -34,7 +35,7 @@ export default function AdminDashboard() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-stats", accessToken],
-    queryFn: () => fetchAdminStats(accessToken),
+    queryFn: () => fetchAdminStats(),
     enabled: !!accessToken,
   });
 

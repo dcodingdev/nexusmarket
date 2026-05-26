@@ -56,6 +56,7 @@ export default function CartReview({ onNext }: CartReviewProps) {
                       src={item.image}
                       alt={item.name}
                       fill
+                      priority
                       className="object-cover"
                     />
                   )}

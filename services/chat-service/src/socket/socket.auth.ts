@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import type { TypedServer } from "./socket.types";
+import logger from "@repo/logger";
 
 export function applySocketAuth(io: TypedServer): void {
   io.use((socket, next) => {
@@ -8,6 +9,7 @@ export function applySocketAuth(io: TypedServer): void {
       (socket.handshake.headers["authorization"] as string);
 
     if (!token) {
+      logger.warn("Socket handshake failed: No token provided");
       return next(new Error("Authentication error: No token provided"));
     }
 
@@ -18,6 +20,7 @@ export function applySocketAuth(io: TypedServer): void {
     try {
       const secret = process.env.JWT_ACCESS_SECRET;
       if (!secret) {
+        logger.error("Socket handshake failed: JWT secret missing");
         return next(new Error("Server configuration error: JWT secret missing"));
       }
 
@@ -33,8 +36,10 @@ export function applySocketAuth(io: TypedServer): void {
         role: decoded.role,
       };
 
+      logger.info({ userId: decoded._id }, "Socket handshake successful");
       next();
-    } catch (err) {
+    } catch (err: any) {
+      logger.warn({ err: err.message }, "Socket handshake failed: Invalid or expired token");
       next(new Error("Authentication error: Invalid or expired token"));
     }
   });

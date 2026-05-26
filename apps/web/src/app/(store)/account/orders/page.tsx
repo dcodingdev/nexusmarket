@@ -15,10 +15,39 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Package, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { useChatUIStore } from "@/store/useChatUIStore";
+import { apiClient } from "@/core/api/client";
+import { toast } from "sonner";
 
 export default function OrdersPage() {
   const [page, setPage] = useState(1);
   const { data, isLoading, error } = useCustomerOrders(page, 10);
+  const { openChat } = useChatUIStore();
+
+  const handleContactVendor = async (order: any) => {
+    const vendorId = order.items[0]?.vendor;
+    if (!vendorId) {
+      toast.error("No vendor found for this order.");
+      return;
+    }
+
+    const toastId = toast.loading("Opening chat with vendor...");
+    try {
+      const res = await apiClient<any>("/chat/conversations", {
+        method: "POST",
+        body: JSON.stringify({
+          title: `Inquiry: Order ${order._id.substring(order._id.length - 8).toUpperCase()}`,
+          participantIds: [vendorId],
+        }),
+      });
+
+      toast.success("Connected with seller!", { id: toastId });
+      openChat(res.data.id);
+    } catch (error: any) {
+      toast.error(error.message || "Could not connect to vendor.", { id: toastId });
+      console.error(error);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -87,7 +116,15 @@ export default function OrdersPage() {
                     <TableCell>
                       {getStatusBadge(order.orderStatus)}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right space-x-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleContactVendor(order)}
+                        className="text-indigo-500 hover:text-indigo-600 font-semibold"
+                      >
+                        Contact Seller
+                      </Button>
                       <Button variant="ghost" size="sm" asChild>
                         <Link href={`/account/orders/${order._id}`}>
                           Details <ExternalLink className="ml-2 h-4 w-4" />

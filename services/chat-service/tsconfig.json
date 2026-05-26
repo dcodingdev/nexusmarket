@@ -33,14 +33,17 @@
 
     "paths": {
       "@/*": ["src/*"],
-      "@repo/types": ["../../packages/types/src/index"],
-      "@repo/api-contracts": ["../../packages/api-contracts/src/index"],
-      "@repo/logger": ["../../packages/logger/src/index"],
-      "@repo/database": ["../../packages/database/src/index"],
-      "@repo/rabbitmq": ["../../packages/rabbitmq/src/index"],
+      "@repo/types": ["../../packages/types/src/index.ts"],
+      "@repo/api-contracts": ["../../packages/api-contracts/src/index.ts"],
+      "@repo/logger": ["../../packages/logger/src/index.ts"],
+      "@repo/database": ["../../packages/database/src/index.ts"],
+      "@repo/rabbitmq": ["../../packages/rabbitmq/src/index.ts"],
       "@repo/auth-service": ["../auth-service/index.ts"]
     }
   },
-  "include": ["src"],
+  "include": [
+    "src/**/*",
+    "../../packages/*/src/**/*"
+  ],
   "exclude": ["node_modules", "dist"]
 }

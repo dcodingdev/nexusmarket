@@ -1,4 +1,5 @@
 import CheckoutWizard from "@/components/modules/checkout/CheckoutWizard";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 export const metadata = {
   title: "Checkout - NexusMarket",
@@ -10,7 +11,9 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-background">
       <main className="container mx-auto">
         <h1 className="text-3xl font-bold tracking-tight mb-8 text-center mt-12">Checkout</h1>
-        <CheckoutWizard />
+        <AuthGuard>
+          <CheckoutWizard />
+        </AuthGuard>
       </main>
     </div>
   );

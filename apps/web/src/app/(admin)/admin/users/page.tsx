@@ -18,24 +18,16 @@ import { toast } from "sonner";
 import { useAuthStore } from "@/store/useAuthStore";
 import React from "react";
 
-async function fetchUsers(token: string | null, search = "") {
-  if (!token) return null;
-  const url = search 
-    ? `http://localhost:8000/api/v1/users?search=${search}` 
-    : `http://localhost:8000/api/v1/users`;
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-  if (!res.ok) throw new Error("Failed to fetch users");
-  return res.json();
+import { apiClient } from "@/core/api/client";
+
+async function fetchUsers(search = "") {
+  return apiClient<any>("/users" + (search ? `?search=${search}` : ""));
 }
 
-async function toggleSuspension(userId: string, token: string | null) {
-  if (!token) throw new Error("Unauthorized");
-  const res = await fetch(`http://localhost:8000/api/v1/users/${userId}/suspend`, {
+async function toggleSuspension(userId: string) {
+  return apiClient<any>(`/users/${userId}/suspend`, {
     method: "PATCH",
-    headers: { Authorization: `Bearer ${token}` }
   });
-  if (!res.ok) throw new Error("Failed to toggle suspension");
-  return res.json();
 }
 
 export default function UserManagementPage() {
@@ -45,12 +37,12 @@ export default function UserManagementPage() {
   
   const { data, isLoading } = useQuery({
     queryKey: ["admin-users", search, accessToken],
-    queryFn: () => fetchUsers(accessToken, search),
+    queryFn: () => fetchUsers(search),
     enabled: !!accessToken,
   });
 
   const mutation = useMutation({
-    mutationFn: (userId: string) => toggleSuspension(userId, accessToken),
+    mutationFn: (userId: string) => toggleSuspension(userId),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       toast.success(data.message);

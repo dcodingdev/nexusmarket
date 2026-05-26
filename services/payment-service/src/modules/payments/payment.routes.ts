@@ -16,6 +16,12 @@ router.route("/process")
     paymentController.createPaymentIntent
   );
 
+router.route("/mock-confirm")
+  .post(
+    authenticate,
+    paymentController.confirmMockPayment
+  );
+
 // Optional: Webhook route (usually public, no authenticate middleware)
 // router.route("/webhook").post(paymentController.handleStripeWebhook);
 

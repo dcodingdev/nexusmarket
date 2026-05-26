@@ -107,3 +107,14 @@ export const handleRazorpayWebhook = async (req: Request, res: Response) => {
     res.status(400).send("Invalid Signature");
   }
 };
+
+// CONFIRM MOCK PAYMENT
+export const confirmMockPayment = async (req: Request, res: Response) => {
+  const { transactionId } = req.body;
+  try {
+    await paymentService.finalizePayment(transactionId);
+    res.status(200).json({ success: true, message: "Mock payment confirmed" });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

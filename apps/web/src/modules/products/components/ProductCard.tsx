@@ -4,6 +4,9 @@ import Image from 'next/image';
 import { ShoppingCart } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { useCartStore } from '@/stores/cart-store';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 interface ProductCardProps {
   product: {
@@ -14,6 +17,7 @@ interface ProductCardProps {
       url: string;
     };
     vendor: {
+      id?: string;
       name: string;
     };
   };
@@ -21,6 +25,8 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, priority = false }: ProductCardProps) {
+  const router = useRouter();
+  const addItem = useCartStore((state) => state.addItem);
   return (
     <div className="group relative overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-all hover:shadow-md hover:-translate-y-1 mb-8">
       {/* Image Container */}
@@ -40,8 +46,18 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             size="sm"
             className="flex items-center gap-2 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95"
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
-              console.log('Add to cart', product.id);
+              addItem({
+                product: product.id,
+                vendor: product.vendor.id || 'unknown_vendor',
+                quantity: 1,
+                priceAtPurchase: product.price,
+                name: product.name,
+                image: product.mainImage.url,
+              });
+              toast.success(`${product.name} added to cart!`);
+              router.push('/checkout');
             }}
           >
             <ShoppingCart className="h-4 w-4" />
