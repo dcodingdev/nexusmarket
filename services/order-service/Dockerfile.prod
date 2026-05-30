@@ -1,3 +1,4 @@
+# ---------- 1. DEPS STAGE ----------
 FROM node:20-alpine AS deps
 WORKDIR /app
 RUN npm install -g pnpm
@@ -10,9 +11,11 @@ COPY packages/database/package.json ./packages/database/
 COPY packages/logger/package.json ./packages/logger/
 COPY packages/rabbitmq/package.json ./packages/rabbitmq/
 COPY packages/types/package.json ./packages/types/
+
 COPY services/order-service/package.json ./services/order-service/
 RUN pnpm install --filter @repo/order-service... --frozen-lockfile
 
+# ---------- 2. BUILD STAGE ----------
 FROM deps AS builder
 COPY packages/api-contracts ./packages/api-contracts
 COPY packages/common ./packages/common
@@ -21,16 +24,30 @@ COPY packages/database ./packages/database
 COPY packages/logger ./packages/logger
 COPY packages/rabbitmq ./packages/rabbitmq
 COPY packages/types ./packages/types
+
 COPY services/order-service ./services/order-service
 RUN pnpm --filter @repo/order-service... run build
 
+# ---------- 3. RUNNER ----------
 FROM node:20-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 RUN npm install -g pnpm
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages ./packages
+# Copy manifests for pnpm install
+COPY pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY package.json ./
+COPY packages/api-contracts/package.json ./packages/api-contracts/
+COPY packages/common/package.json ./packages/common/
+COPY packages/config/package.json ./packages/config/
+COPY packages/database/package.json ./packages/database/
+COPY packages/logger/package.json ./packages/logger/
+COPY packages/rabbitmq/package.json ./packages/rabbitmq/
+COPY packages/types/package.json ./packages/types/
+
+COPY services/order-service/package.json ./services/order-service/
+# Install prod deps only (no devDeps, resolves symlinks correctly)
+RUN pnpm install --filter @repo/order-service... --frozen-lockfile --prod
+# Copy compiled output
 COPY --from=builder /app/services/order-service/dist ./services/order-service/dist
-COPY --from=builder /app/services/order-service/package.json ./services/order-service/package.json
 EXPOSE 4003
 CMD ["node", "services/order-service/dist/services/order-service/src/server.js"]
