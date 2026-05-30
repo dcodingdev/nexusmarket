@@ -1,8 +1,6 @@
-# ---------- 1. DEPS STAGE ----------
 FROM node:20-alpine AS deps
 WORKDIR /app
 RUN npm install -g pnpm
-
 COPY pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 COPY package.json ./
 COPY packages/api-contracts/package.json ./packages/api-contracts/
@@ -15,17 +13,24 @@ COPY packages/types/package.json ./packages/types/
 COPY services/payment-service/package.json ./services/payment-service/
 RUN pnpm install --filter @repo/payment-service... --frozen-lockfile
 
-# ---------- 2. BUILD STAGE ----------
 FROM deps AS builder
-COPY packages ./packages
+COPY packages/api-contracts ./packages/api-contracts
+COPY packages/common ./packages/common
+COPY packages/config ./packages/config
+COPY packages/database ./packages/database
+COPY packages/logger ./packages/logger
+COPY packages/rabbitmq ./packages/rabbitmq
+COPY packages/types ./packages/types
 COPY services/payment-service ./services/payment-service
 RUN pnpm --filter @repo/payment-service... run build
 
-# ---------- 3. RUNNER ----------
 FROM node:20-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 RUN npm install -g pnpm
-COPY --from=builder /app .
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/services/payment-service/dist ./services/payment-service/dist
+COPY --from=builder /app/services/payment-service/package.json ./services/payment-service/package.json
 EXPOSE 4004
 CMD ["node", "services/payment-service/dist/src/server.js"]
