@@ -31,7 +31,7 @@ services:
       - key: CLIENT_URL
         sync: false
       - key: RABBITMQ_URL
-        fromGroup: nexusmarket-secrets
+        sync: false
 
   # ============================================================
   # PRODUCT SERVICE
@@ -55,7 +55,7 @@ services:
       - key: CLIENT_URL
         sync: false
       - key: RABBITMQ_URL
-        fromGroup: nexusmarket-secrets
+        sync: false
       - key: IMAGEKIT_PUBLIC_KEY
         sync: false
       - key: IMAGEKIT_PRIVATE_KEY
@@ -85,7 +85,7 @@ services:
       - key: CLIENT_URL
         sync: false
       - key: RABBITMQ_URL
-        fromGroup: nexusmarket-secrets
+        sync: false
 
   # ============================================================
   # PAYMENT SERVICE
@@ -109,7 +109,7 @@ services:
       - key: CLIENT_URL
         sync: false
       - key: RABBITMQ_URL
-        fromGroup: nexusmarket-secrets
+        sync: false
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_WEBHOOK_SECRET
@@ -135,7 +135,7 @@ services:
       - key: JWT_ACCESS_SECRET
         sync: false
       - key: RABBITMQ_URL
-        fromGroup: nexusmarket-secrets
+        sync: false
       - key: REDIS_URL
         fromService:
           name: nexusmarket-redis

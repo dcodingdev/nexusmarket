@@ -16,7 +16,7 @@ export function WishlistDrawer() {
   const { items, removeItem } = useWishlistStore();
   const { addItem } = useCartStore();
   const [isOpen, setIsOpen] = useState(false);
-  
+
   // Hydration fix
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
