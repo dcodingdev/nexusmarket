@@ -52,6 +52,9 @@ const orderSchema = new Schema<IOrder>(
 
 orderSchema.plugin(aggregatePaginate);
 
+// Indexes for performance
+orderSchema.index({ createdAt: -1 });
+
 export const Order = mongoose.model<IOrder, mongoose.AggregatePaginateModel<IOrder>>(
   "Order", 
   orderSchema

@@ -3,12 +3,13 @@
 import { useProduct } from '@/modules/products/hooks/useProducts';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
-import { ShoppingCart, ArrowLeft, Store } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, Store, Heart } from 'lucide-react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 
 import { useCartStore } from '@/stores/cart-store';
+import { useWishlistStore } from '@/stores/wishlist-store';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useChatUIStore } from '@/store/useChatUIStore';
@@ -21,6 +22,10 @@ export default function ProductDetailPage() {
   const { data, isLoading, error } = useProduct(id);
   const addItem = useCartStore((state) => state.addItem);
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  const { openChat } = useChatUIStore();
+  const { addItem: addWishlist, removeItem: removeWishlist, isLiked } = useWishlistStore();
+  
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 animate-pulse">
@@ -48,8 +53,6 @@ export default function ProductDetailPage() {
   }
 
   const product = data.data;
-  const { isAuthenticated } = useAuth();
-  const { openChat } = useChatUIStore();
 
   const handleAddToCart = () => {
     addItem({
@@ -61,7 +64,24 @@ export default function ProductDetailPage() {
       image: product.mainImage.url,
     });
     toast.success(`${product.name} added to cart!`);
-    router.push('/checkout');
+  };
+
+  const liked = isLiked(product._id);
+  const toggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (liked) {
+      removeWishlist(product._id);
+    } else {
+      addWishlist({
+        product: product._id,
+        vendor: product.vendor.id,
+        price: product.price,
+        name: product.name,
+        image: product.mainImage.url,
+      });
+      toast.success(`${product.name} added to liked products!`);
+    }
   };
 
   const handleChatWithVendor = async () => {
@@ -127,14 +147,24 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="mt-auto space-y-4">
-            <Button 
-              size="lg" 
-              className="flex w-full items-center justify-center gap-2 rounded-xl text-base font-semibold shadow-lg transition-transform hover:scale-[1.02] active:scale-95 bg-primary text-primary-foreground"
-              onClick={handleAddToCart}
-            >
-              <ShoppingCart className="h-5 w-5" />
-              Add to Cart
-            </Button>
+            <div className="flex gap-4">
+              <Button 
+                size="lg" 
+                className="flex-1 items-center justify-center gap-2 rounded-xl text-base font-semibold shadow-lg transition-transform hover:scale-[1.02] active:scale-95 bg-primary text-primary-foreground"
+                onClick={handleAddToCart}
+              >
+                <ShoppingCart className="h-5 w-5" />
+                Add to Cart
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className={`h-12 w-12 rounded-xl border-border shadow-sm transition-colors ${liked ? 'text-red-500 bg-red-50/10' : 'text-muted-foreground'}`}
+                onClick={toggleWishlist}
+              >
+                <Heart className={`h-6 w-6 ${liked ? 'fill-current' : ''}`} />
+              </Button>
+            </div>
             
             <Button 
               variant="outline"

@@ -46,6 +46,9 @@ const reviewSchema = new Schema<IReview>(
   }
 );
 
+// Indexes for performance
+reviewSchema.index({ createdAt: -1 });
+
 export const Review = mongoose.model<IReview, AggregatePaginateModel<IReview>>(
   "Review",
   reviewSchema

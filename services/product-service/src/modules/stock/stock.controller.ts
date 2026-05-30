@@ -1,108 +1,3 @@
-// import { Request, Response } from "express";
-// import { Stock } from "./stock.model";
-// import logger from "@repo/logger";
-
-// /**
-//  * 🛠️ Update Physical Stock (Vendor Action)
-//  * Used when a vendor adds new inventory.
-//  */
-// export const updatePhysicalStock = async (req: Request, res: Response) => {
-//   try {
-//     const { productId } = req.params;
-//     const { quantity, lowStockThreshold } = req.body;
-
-//     const stock = await Stock.findOneAndUpdate(
-//       { productId },
-//       { 
-//         $set: { quantity, lowStockThreshold },
-//       },
-//       { new: true, upsert: true, runValidators: true }
-//     );
-
-//     // .save() is called implicitly or we manually trigger it to run the 'pre-save' hook 
-//     // for status logic. Alternatively, use a find and then save:
-//     await stock.save(); 
-
-//     res.status(200).json({ success: true, data: stock });
-//   } catch (error: any) {
-//     res.status(400).json({ success: false, message: error.message });
-//   }
-// };
-
-// /**
-//  * 🕒 Reserve Stock (Internal/System Action)
-//  * Moves quantity from 'available' to 'reserved' when an order is created.
-//  */
-// export const reserveStock = async (req: Request, res: Response) => {
-//   try {
-//     const { productId } = req.params;
-//     const { amount } = req.body; // e.g., 2 items
-
-//     // Atomic update: ensure we have enough physical stock minus currently reserved
-//     const stock = await Stock.findOne({ productId });
-
-//     if (!stock || (stock.quantity - stock.reservedQuantity) < amount) {
-//       return res.status(400).json({ success: false, message: "Insufficient stock available" });
-//     }
-
-//     stock.reservedQuantity += amount;
-//     await stock.save(); // Triggers the status update hook
-
-//     res.status(200).json({ success: true, data: stock });
-//   } catch (error: any) {
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
-
-// /**
-//  * ✅ Confirm Sale (After Payment)
-//  * Deducts from both physical quantity AND reserved quantity.
-//  */
-// export const confirmSale = async (req: Request, res: Response) => {
-//   try {
-//     const { productId } = req.params;
-//     const { amount } = req.body;
-
-//     const stock = await Stock.findOne({ productId });
-
-//     if (!stock || stock.reservedQuantity < amount) {
-//       return res.status(404).json({ message: "Insufficient reserved stock" });
-//     }
-
-//     stock.quantity -= amount;
-//     stock.reservedQuantity -= amount;
-    
-//     await stock.save(); // This correctly triggers your status hook!
-    
-//     res.status(200).json({ success: true, data: stock });
-//   } catch (error: any) {
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
-
-// /**
-//  * ❌ Release Reservation (Order Cancelled/Expired)
-//  * Moves reserved back to available pool.
-//  */
-// export const releaseReservation = async (req: Request, res: Response) => {
-//   try {
-//     const { productId } = req.params;
-//     const { amount } = req.body;
-
-//     const stock = await Stock.findOneAndUpdate(
-//       { productId },
-//       { $inc: { reservedQuantity: -amount } },
-//       { new: true }
-//     );
-
-//     await stock!.save();
-//     res.status(200).json({ success: true, data: stock });
-//   } catch (error: any) {
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
-
-
 import { Request, Response } from "express";
 import { Stock } from "./stock.model.js";
 import logger from "@repo/logger";
@@ -212,6 +107,111 @@ export const releaseReservation = async (req: Request, res: Response) => {
 
     await stock.save();
     res.status(200).json({ success: true, data: stock });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Batch Reserve Stock
+ * Atomic check to ensure availability before incrementing reserved quantity for multiple items.
+ */
+export const batchReserveStock = async (req: Request, res: Response) => {
+  try {
+    const { items } = req.body; // Expects an array of { productId, amount }
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, message: "Items array is required" });
+    }
+
+    // First check if all items have enough stock
+    const productIds = items.map((item: any) => item.productId);
+    const stocks = await Stock.find({ productId: { $in: productIds } });
+
+    const stockMap = new Map();
+    stocks.forEach((s: any) => stockMap.set(s.productId.toString(), s));
+
+    for (const item of items) {
+      const stock = stockMap.get(item.productId.toString());
+      if (!stock) {
+        return res.status(404).json({ success: false, message: `Stock record not found for product ${item.productId}` });
+      }
+      if ((stock.quantity - stock.reservedQuantity) < item.amount) {
+        return res.status(400).json({ success: false, message: `Insufficient stock available for product ${item.productId}` });
+      }
+    }
+
+    // All items passed validation, now perform a bulk write
+    const bulkOps = items.map((item: any) => ({
+      updateOne: {
+        filter: { productId: item.productId },
+        update: { $inc: { reservedQuantity: item.amount } }
+      }
+    }));
+
+    await Stock.bulkWrite(bulkOps);
+
+    res.status(200).json({ success: true, message: "Batch stock reserved successfully" });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Batch Confirm Sale
+ * Deducts from physical quantity AND clears the reservation for multiple items.
+ */
+export const batchConfirmSale = async (req: Request, res: Response) => {
+  try {
+    const { items } = req.body; // Expects an array of { productId, amount }
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, message: "Items array is required" });
+    }
+
+    const bulkOps = items.map((item: any) => ({
+      updateOne: {
+        filter: { productId: item.productId, reservedQuantity: { $gte: item.amount } },
+        update: { $inc: { quantity: -item.amount, reservedQuantity: -item.amount } }
+      }
+    }));
+
+    const result = await Stock.bulkWrite(bulkOps);
+    
+    // Check if some documents were not updated due to insufficient reserved quantity
+    if (result.modifiedCount !== items.length) {
+       // Log warning, some items failed confirmation
+       logger.warn({ bulkOps, modifiedCount: result.modifiedCount }, "Not all items had sufficient reserved stock during batch confirmation");
+    }
+
+    res.status(200).json({ success: true, message: "Batch sale confirmed successfully" });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Batch Release Reservation
+ * Used if an order is cancelled or payment fails.
+ */
+export const batchReleaseReservation = async (req: Request, res: Response) => {
+  try {
+    const { items } = req.body; // Expects an array of { productId, amount }
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, message: "Items array is required" });
+    }
+
+    const bulkOps = items.map((item: any) => ({
+      updateOne: {
+        filter: { productId: item.productId, reservedQuantity: { $gte: item.amount } },
+        update: { $inc: { reservedQuantity: -item.amount } }
+      }
+    }));
+
+    await Stock.bulkWrite(bulkOps);
+
+    res.status(200).json({ success: true, message: "Batch reservation released successfully" });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }

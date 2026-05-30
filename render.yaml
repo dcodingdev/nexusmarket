@@ -1,0 +1,180 @@
+services:
+  # ============================================================
+  # REDIS
+  # ============================================================
+  - type: redis
+    name: nexusmarket-redis
+    plan: free
+    ipAllowList: []
+
+  # ============================================================
+  # AUTH SERVICE
+  # ============================================================
+  - type: web
+    name: nexusmarket-auth
+    plan: free
+    runtime: docker
+    repo: https://github.com/dcodingdev/nexusmarket
+    dockerfilePath: services/auth-service/Dockerfile
+    dockerContext: .
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: AUTH_PORT
+        value: 4001
+      - key: AUTH_MONGO_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: RABBITMQ_URL
+        fromGroup: nexusmarket-secrets
+
+  # ============================================================
+  # PRODUCT SERVICE
+  # ============================================================
+  - type: web
+    name: nexusmarket-product
+    plan: free
+    runtime: docker
+    repo: https://github.com/dcodingdev/nexusmarket
+    dockerfilePath: services/product-service/Dockerfile
+    dockerContext: .
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PRODUCT_PORT
+        value: 4002
+      - key: PRODUCT_MONGO_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: RABBITMQ_URL
+        fromGroup: nexusmarket-secrets
+      - key: IMAGEKIT_PUBLIC_KEY
+        sync: false
+      - key: IMAGEKIT_PRIVATE_KEY
+        sync: false
+      - key: IMAGEKIT_URL_ENDPOINT
+        sync: false
+
+  # ============================================================
+  # ORDER SERVICE
+  # ============================================================
+  - type: web
+    name: nexusmarket-order
+    plan: free
+    runtime: docker
+    repo: https://github.com/dcodingdev/nexusmarket
+    dockerfilePath: services/order-service/Dockerfile
+    dockerContext: .
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ORDER_PORT
+        value: 4003
+      - key: ORDER_MONGO_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: RABBITMQ_URL
+        fromGroup: nexusmarket-secrets
+
+  # ============================================================
+  # PAYMENT SERVICE
+  # ============================================================
+  - type: web
+    name: nexusmarket-payment
+    plan: free
+    runtime: docker
+    repo: https://github.com/dcodingdev/nexusmarket
+    dockerfilePath: services/payment-service/Dockerfile
+    dockerContext: .
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PAYMENT_PORT
+        value: 4004
+      - key: PAYMENT_MONGO_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: RABBITMQ_URL
+        fromGroup: nexusmarket-secrets
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+
+  # ============================================================
+  # CHAT SERVICE
+  # ============================================================
+  - type: web
+    name: nexusmarket-chat
+    plan: free
+    runtime: docker
+    repo: https://github.com/dcodingdev/nexusmarket
+    dockerfilePath: services/chat-service/Dockerfile
+    dockerContext: .
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CHAT_PORT
+        value: 4006
+      - key: CHAT_MONGO_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: RABBITMQ_URL
+        fromGroup: nexusmarket-secrets
+      - key: REDIS_URL
+        fromService:
+          name: nexusmarket-redis
+          type: redis
+          property: connectionString
+
+  # ============================================================
+  # NGINX GATEWAY
+  # ============================================================
+  - type: web
+    name: nexusmarket-gateway
+    plan: free
+    runtime: docker
+    repo: https://github.com/dcodingdev/nexusmarket
+    dockerfilePath: infrastructure/nginx/Dockerfile.nginx
+    dockerContext: .
+    envVars:
+      - key: AUTH_SERVICE_URL
+        fromService:
+          name: nexusmarket-auth
+          type: web
+          property: host
+      - key: PRODUCT_SERVICE_URL
+        fromService:
+          name: nexusmarket-product
+          type: web
+          property: host
+      - key: ORDER_SERVICE_URL
+        fromService:
+          name: nexusmarket-order
+          type: web
+          property: host
+      - key: PAYMENT_SERVICE_URL
+        fromService:
+          name: nexusmarket-payment
+          type: web
+          property: host
+      - key: CHAT_SERVICE_URL
+        fromService:
+          name: nexusmarket-chat
+          type: web
+          property: host

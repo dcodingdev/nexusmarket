@@ -9,7 +9,9 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@repo/api-contracts": "workspace:*",
     "@repo/common": "workspace:*",
+    "@repo/config": "workspace:*",
     "@repo/database": "workspace:*",
     "@repo/image-storage": "workspace:*",
     "@repo/logger": "workspace:*",

@@ -1,4 +1,4 @@
-import CheckoutWizard from "@/components/modules/checkout/CheckoutWizard";
+import CheckoutWizard from "@/modules/checkout/CheckoutWizard";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 
 export const metadata = {

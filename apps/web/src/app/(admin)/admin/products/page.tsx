@@ -7,12 +7,15 @@ import {
   Eye, 
   EyeOff, 
   AlertTriangle,
-  ExternalLink
+  ExternalLink,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 import { toast } from "sonner";
 
 import { useAuthStore } from "@/store/useAuthStore";
@@ -20,12 +23,14 @@ import React from "react";
 
 import { apiClient } from "@/core/api/client";
 
-async function fetchAllProducts(search = "") {
-  return apiClient<any>("/products" + (search ? `?search=${search}` : ""));
+async function fetchAllProducts(search = "", page = 1) {
+  const queryParams = new URLSearchParams({ page: page.toString(), limit: "10" });
+  if (search) queryParams.append("search", search);
+  return apiClient<any>(`/products?${queryParams.toString()}`);
 }
 
 async function togglePublish(productId: string) {
-  return apiClient<any>(`/products/${productId}/publish`, {
+  return apiClient<any>(`/products/${productId}/toggle-publish`, {
     method: "PATCH",
   });
 }
@@ -33,11 +38,12 @@ async function togglePublish(productId: string) {
 export default function ProductOversightPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = React.useState("");
+  const [page, setPage] = React.useState(1);
   const { accessToken } = useAuthStore();
   
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-products", search, accessToken],
-    queryFn: () => fetchAllProducts(search),
+    queryKey: ["admin-products", search, page, accessToken],
+    queryFn: () => fetchAllProducts(search, page),
     enabled: !!accessToken,
   });
 
@@ -68,7 +74,10 @@ export default function ProductOversightPage() {
             placeholder="Search products..." 
             className="pl-10"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1); // reset to page 1 on search
+            }}
           />
         </div>
       </div>
@@ -112,22 +121,25 @@ export default function ProductOversightPage() {
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
-                    <Button variant="outline" size="sm" className="h-9" asChild>
-                      <a href={`/products/${product._id}`} target="_blank">
-                        <ExternalLink className="w-4 h-4 mr-2" /> View
-                      </a>
-                    </Button>
                     <Button 
                       variant={product.isDraft ? "default" : "destructive"} 
                       size="sm" 
-                      className="h-9 gap-2"
-                      onClick={() => mutation.mutate(product._id)}
+                      onClick={() => {
+                        const loadingToast = toast.loading(
+                          product.isDraft ? "Publishing..." : "Unpublishing..."
+                        );
+                        togglePublish(product._id)
+                          .then(() => {
+                            toast.success(`Product ${product.isDraft ? "published" : "unpublished"}!`, { id: loadingToast });
+                            queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+                          })
+                          .catch(() => {
+                            toast.error("Failed to change product status", { id: loadingToast });
+                          });
+                      }}
                     >
-                      {product.isDraft ? (
-                        <><Eye className="w-4 h-4" /> Publish</>
-                      ) : (
-                        <><EyeOff className="w-4 h-4" /> Unpublish</>
-                      )}
+                      {product.isDraft ? <Eye className="w-4 h-4 mr-2" /> : <EyeOff className="w-4 h-4 mr-2" />}
+                      {product.isDraft ? "Publish" : "Unpublish"}
                     </Button>
                   </div>
                 </div>
@@ -136,6 +148,32 @@ export default function ProductOversightPage() {
           ))
         )}
       </div>
+
+      {data?.totalPages > 1 && (
+        <div className="flex items-center justify-between border-t pt-4">
+          <p className="text-sm text-muted-foreground">
+            Showing page {data.page} of {data.totalPages}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              <ChevronLeft className="w-4 h-4 mr-1" /> Previous
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
+              disabled={page === data.totalPages}
+            >
+              Next <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

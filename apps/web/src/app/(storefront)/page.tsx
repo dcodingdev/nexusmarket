@@ -3,205 +3,161 @@
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { 
-  ArrowRight, 
-  CreditCard, 
-  MessageSquare, 
-  ShieldCheck, 
-  Zap, 
-  TrendingUp, 
-  Users, 
-  CheckCircle2 
+import { useProducts } from '@/modules/products/hooks/useProducts';
+import { ProductCard } from '@/modules/products/components/ProductCard';
+import {
+  ArrowRight,
+  CreditCard,
+  MessageSquare,
+  ShieldCheck,
+  Zap,
+  TrendingUp,
+  Users,
+  CheckCircle2
 } from 'lucide-react';
 
 export default function StorefrontPage() {
   const { isAuthenticated, user } = useAuth();
+  const { data: productsData, isLoading } = useProducts({ limit: 12 });
 
   return (
-    <div className="relative overflow-hidden min-h-screen bg-background">
-      {/* Dynamic Ambient Background Glows */}
-      <div className="absolute top-0 left-1/4 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary/10 blur-[130px] pointer-events-none" />
-      <div className="absolute top-1/3 right-0 w-[450px] h-[450px] rounded-full bg-violet-600/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-10 left-1/3 w-[500px] h-[500px] rounded-full bg-indigo-500/5 blur-[140px] pointer-events-none" />
+    <div className="relative overflow-hidden min-h-screen bg-background text-foreground selection:bg-primary/30">
+      {/* Cinematic Ambient Background Glows */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,rgba(255,255,255,0.03)_0%,transparent_70%)] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/10 blur-[150px] rounded-full pointer-events-none opacity-40 mix-blend-screen" />
+      <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-violet-600/5 blur-[150px] rounded-full pointer-events-none opacity-30 mix-blend-screen" />
+      <div className="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-indigo-500/5 blur-[150px] rounded-full pointer-events-none opacity-30 mix-blend-screen" />
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-20 pb-16 md:pt-32 md:pb-24 border-b border-border/40">
-        <div className="container mx-auto px-4 text-center max-w-4xl space-y-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-semibold uppercase tracking-wider animate-in fade-in slide-in-from-top-4 duration-300">
-            <Zap className="w-3.5 h-3.5" />
-            Marketplace Version 2.0 Live
-          </div>
-          
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-[1.1] bg-gradient-to-r from-foreground via-foreground/90 to-muted-foreground bg-clip-text text-transparent">
+      <section className="relative pt-32 pb-24 md:pt-48 md:pb-32 flex flex-col items-center justify-center min-h-[85vh]">
+        <div className="container mx-auto px-6 text-center max-w-5xl space-y-10">
+
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-[1.05] text-foreground drop-shadow-sm">
             The Next-Generation <br />
-            <span className="bg-gradient-to-r from-primary via-violet-500 to-indigo-600 bg-clip-text text-transparent">
-              Decentralized Marketplace
+            <span className="text-transparent bg-clip-text bg-gradient-to-b from-foreground to-foreground/40">
+              Microservices Marketplace
             </span>
           </h1>
 
-          <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">
-            NexusMarket connects creators, customers, and vendors in a secure, instant, and borderless e-commerce network. Built for speed and reliability.
+          <p className="text-muted-foreground/70 text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed font-light tracking-wide">
+            NexusMarket connects creators, customers, and vendors in a secure, high-performance architecture. Built for scale, designed for precision.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-8">
             <Link href="/products" className="w-full sm:w-auto">
               <Button
-                className="w-full h-12 px-8 bg-gradient-to-r from-primary to-violet-600 hover:from-primary/95 hover:to-violet-600/95 text-primary-foreground font-semibold rounded-xl shadow-xl shadow-primary/15 flex items-center justify-center gap-2 group transition-all duration-300"
+                className="w-full sm:w-auto h-14 px-10 bg-primary/90 text-primary-foreground font-medium rounded-full shadow-[0_0_40px_-10px] shadow-primary/30 hover:shadow-[0_0_60px_-10px] hover:shadow-primary/50 hover:scale-[1.02] transition-all duration-500 ease-out flex items-center justify-center gap-3 group border border-primary/50 backdrop-blur-md"
               >
-                Explore Products
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                <span className="tracking-wide">Explore Products</span>
+                <ArrowRight className="w-4 h-4 opacity-70 group-hover:translate-x-1 group-hover:opacity-100 transition-all duration-300" />
               </Button>
             </Link>
-
-            {isAuthenticated && user?.role?.toUpperCase() === 'VENDOR' ? (
-              <Link href="/vendor" className="w-full sm:w-auto">
-                <Button variant="outline" className="w-full sm:w-auto h-12 px-8 rounded-xl border-border/80 hover:bg-muted/80 font-semibold">
-                  Dashboard Settings
-                </Button>
-              </Link>
-            ) : (
-              <Link href={isAuthenticated ? "/vendor" : "/login?redirect=/vendor"} className="w-full sm:w-auto">
-                <Button variant="outline" className="w-full sm:w-auto h-12 px-8 rounded-xl border-border/80 hover:bg-muted/80 font-semibold">
-                  Start Selling Now
-                </Button>
-              </Link>
-            )}
           </div>
         </div>
       </section>
 
       {/* 2. STATS SECTION */}
-      <section className="py-12 border-b border-border/40 bg-muted/20 backdrop-blur-sm relative">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center max-w-5xl mx-auto">
-            <div className="space-y-1">
-              <div className="flex justify-center text-primary mb-2">
-                <TrendingUp className="w-5 h-5" />
+      <section className="py-16 md:py-24 relative z-10 border-y border-white/[0.02] bg-black/20 backdrop-blur-sm">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center max-w-6xl mx-auto">
+            {[
+              { icon: TrendingUp, value: '99.9%', label: 'Checkout Success' },
+              { icon: Users, value: '500+', label: 'Active Vendors' },
+              { icon: CheckCircle2, value: '10K+', label: 'Fulfilled Orders' },
+              { icon: ShieldCheck, value: '100%', label: 'Secure Vaults' }
+            ].map((stat, i) => (
+              <div key={i} className="space-y-5 group">
+                <div className="flex justify-center">
+                  <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] group-hover:bg-primary/5 group-hover:border-primary/20 group-hover:shadow-[0_0_30px_-5px] group-hover:shadow-primary/20 transition-all duration-500 ease-out">
+                    <stat.icon className="w-5 h-5 text-muted-foreground/60 group-hover:text-primary transition-colors duration-500" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-3xl md:text-5xl font-semibold tracking-tighter text-foreground/90 group-hover:text-foreground transition-colors duration-500">{stat.value}</h3>
+                  <p className="text-[10px] md:text-xs uppercase text-muted-foreground/50 font-medium tracking-[0.2em] mt-3">{stat.label}</p>
+                </div>
               </div>
-              <h3 className="text-3xl font-black tracking-tight text-foreground">99.9%</h3>
-              <p className="text-xs uppercase text-muted-foreground font-semibold tracking-wider">Checkout Success</p>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-center text-primary mb-2">
-                <Users className="w-5 h-5" />
-              </div>
-              <h3 className="text-3xl font-black tracking-tight text-foreground">500+</h3>
-              <p className="text-xs uppercase text-muted-foreground font-semibold tracking-wider">Active Vendors</p>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-center text-primary mb-2">
-                <CheckCircle2 className="w-5 h-5" />
-              </div>
-              <h3 className="text-3xl font-black tracking-tight text-foreground">10K+</h3>
-              <p className="text-xs uppercase text-muted-foreground font-semibold tracking-wider">Fulfilled Orders</p>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-center text-primary mb-2">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <h3 className="text-3xl font-black tracking-tight text-foreground">100%</h3>
-              <p className="text-xs uppercase text-muted-foreground font-semibold tracking-wider">Secure Vaults</p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* 3. FEATURES SECTION */}
-      <section className="py-20 border-b border-border/40">
-        <div className="container mx-auto px-4 max-w-5xl">
-          <div className="text-center space-y-3 mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+      <section className="py-24 md:py-32 relative z-10">
+        <div className="container mx-auto px-6 max-w-7xl">
+          <div className="text-center space-y-6 mb-24">
+            <h2 className="text-3xl md:text-5xl font-semibold tracking-tighter text-foreground drop-shadow-sm">
               Engineered for Modern Commerce
             </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
+            <p className="text-muted-foreground/60 max-w-2xl mx-auto text-base md:text-lg leading-relaxed font-light tracking-wide">
               Explore the advanced features that make NexusMarket the fastest, most reliable platform to buy and sell products.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="p-6 rounded-2xl border bg-card hover:border-primary/30 shadow-sm transition-all duration-300 hover:-translate-y-1 group">
-              <div className="p-3 rounded-xl bg-primary/10 text-primary w-fit mb-6 group-hover:bg-primary/15 transition-colors">
-                <CreditCard className="w-6 h-6" />
+          <div className="flex flex-wrap justify-center gap-6 md:gap-8">
+            {[
+              { icon: ShieldCheck, title: 'Secure Authentication', desc: 'Robust and secure authentication system protecting user data and facilitating seamless onboarding.' },
+              { icon: MessageSquare, title: 'Live Vendor Chat', desc: 'Negotiate, ask questions, and resolve queries directly with shop owners using real-time socket chat.' },
+              { icon: Zap, title: 'Dynamic Product Catalog', desc: 'Lightning-fast inventory management with instant stock sync across the entire platform.' },
+              { icon: TrendingUp, title: 'Seamless Order Management', desc: 'Advanced order tracking and fulfillment workflows designed for high-volume transactions.' },
+              { icon: CreditCard, title: 'Multi-Gateway Payments', desc: 'Securely process payments instantly through integrated global payment gateways.' }
+            ].map((feature, i) => (
+              <div key={i} className="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] group relative p-8 md:p-10 rounded-[2.5rem] bg-white/[0.01] border border-white/[0.03] hover:bg-white/[0.02] hover:border-white/[0.08] transition-all duration-700 overflow-hidden flex flex-col justify-between shadow-[0_0_0_rgba(0,0,0,0)] hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.5)]">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                <div className="relative z-10">
+                  <div className="w-14 h-14 rounded-2xl bg-white/[0.02] border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-primary/10 group-hover:border-primary/20 group-hover:shadow-[0_0_40px_-10px] group-hover:shadow-primary/30 transition-all duration-500 ease-out">
+                    <feature.icon className="w-6 h-6 text-muted-foreground/60 group-hover:text-primary transition-colors duration-500" />
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-medium text-foreground/90 mb-4 tracking-tight">{feature.title}</h3>
+                  <p className="text-sm md:text-base text-muted-foreground/60 leading-relaxed font-light tracking-wide">
+                    {feature.desc}
+                  </p>
+                </div>
               </div>
-              <h3 className="text-lg font-bold text-foreground mb-2">Multi-Gateway Secure</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Pay instantly using either Stripe (Cards, GPay) or Razorpay (UPI, Netbanking) with automated sandbox simulations.
-              </p>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="p-6 rounded-2xl border bg-card hover:border-primary/30 shadow-sm transition-all duration-300 hover:-translate-y-1 group">
-              <div className="p-3 rounded-xl bg-primary/10 text-primary w-fit mb-6 group-hover:bg-primary/15 transition-colors">
-                <MessageSquare className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground mb-2">Live Vendor Chat</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Negotiate, ask questions, and resolve queries directly with active shop owners using real-time built-in socket chat.
-              </p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="p-6 rounded-2xl border bg-card hover:border-primary/30 shadow-sm transition-all duration-300 hover:-translate-y-1 group">
-              <div className="p-3 rounded-xl bg-primary/10 text-primary w-fit mb-6 group-hover:bg-primary/15 transition-colors">
-                <Zap className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground mb-2">Instant Stock Sync</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Never face inventory issues. Real-time stock locks and releases are handled by asynchronous event bus triggers.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* 4. CURATED CATALOG DIRECTORY */}
-      <section id="products-section" className="py-20 border-b border-border/40 scroll-mt-16 bg-muted/10 relative">
-        <div className="container mx-auto px-4 max-w-4xl text-center space-y-8">
-          <div className="space-y-3">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              Discover Our Curated Collections
+      <section id="products-section" className="py-24 md:py-32 relative z-10 border-t border-white/[0.02]">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent pointer-events-none" />
+        <div className="container mx-auto px-6 max-w-7xl text-center space-y-16 relative">
+          <div className="space-y-6">
+            <h2 className="text-3xl md:text-5xl font-semibold tracking-tighter text-foreground drop-shadow-sm">
+              Latest Products
             </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
-              Browse through our full multi-vendor catalog. Shop unique and trending items from verified independent sellers with secure checkout.
+            <p className="text-muted-foreground/60 max-w-2xl mx-auto text-base md:text-lg leading-relaxed font-light tracking-wide">
+              Browse through our multi-vendor catalog. Shop unique items from independent sellers.
             </p>
           </div>
 
-          <div className="pt-4">
+          <div className="text-left">
+            {isLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="animate-pulse bg-white/[0.02] border border-white/[0.05] rounded-[2rem] h-[400px]" />
+                ))}
+              </div>
+            ) : productsData?.docs && productsData.docs.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+                {productsData.docs.map(product => (
+                  <ProductCard key={product._id} product={{ ...product, id: product._id } as any} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-32 text-muted-foreground/40 border border-dashed border-white/[0.05] rounded-[2.5rem] bg-white/[0.01]">
+                <p className="text-lg tracking-wide font-light">No products found yet.</p>
+              </div>
+            )}
+          </div>
+
+          <div className="pt-12">
             <Link href="/products">
-              <Button size="lg" className="h-12 px-8 bg-primary text-primary-foreground font-semibold rounded-xl hover:bg-primary/95 shadow-lg shadow-primary/10">
+              <Button size="lg" className="h-14 px-10 bg-white/[0.02] text-foreground font-medium rounded-full border border-white/[0.05] hover:bg-white/[0.05] hover:border-white/[0.1] hover:shadow-[0_0_40px_-10px_rgba(255,255,255,0.05)] hover:-translate-y-0.5 transition-all duration-500 ease-out backdrop-blur-md tracking-wide">
                 Browse Full Catalog
               </Button>
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. SELLER CTA SECTION */}
-      <section className="py-24 relative overflow-hidden bg-card/40 border-b border-border/40">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
-        <div className="container mx-auto px-4 max-w-3xl text-center space-y-8 relative z-10">
-          <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-foreground">
-            Launch Your Virtual Storefront
-          </h2>
-          <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto leading-relaxed">
-            Create listings, manage inventory and logs, set secure payment rates, and chat live with customers worldwide.
-          </p>
-
-          <div className="flex justify-center pt-2">
-            {isAuthenticated && user?.role?.toUpperCase() === 'VENDOR' ? (
-              <Link href="/vendor">
-                <Button className="h-12 px-8 bg-primary text-primary-foreground font-semibold rounded-xl hover:bg-primary/95 shadow-lg shadow-primary/10">
-                  Open Vendor Portal
-                </Button>
-              </Link>
-            ) : (
-              <Link href={isAuthenticated ? "/vendor" : "/login?redirect=/vendor"}>
-                <Button className="h-12 px-8 bg-primary text-primary-foreground font-semibold rounded-xl hover:bg-primary/95 shadow-lg shadow-primary/10">
-                  Become a Seller
-                </Button>
-              </Link>
-            )}
           </div>
         </div>
       </section>

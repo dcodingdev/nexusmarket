@@ -15,6 +15,8 @@ export interface CreateConversationInput {
 
 export interface ConversationFilter {
     participantId: string;
+    page?: number;
+    limit?: number;
 }
 
 export type ConversationSummary = Conversation;

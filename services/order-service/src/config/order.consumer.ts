@@ -20,12 +20,12 @@ export const initOrderConsumers = async () => {
         { new: true }
       );
 
-      if (order) {
-        for (const item of order.items) {
-          await axios.post(`${STOCK_SERVICE_URL}/${item.product}/confirm`, {
-            amount: item.quantity,
-          });
-        }
+      if (order && order.items.length > 0) {
+        const batchItems = order.items.map((item: any) => ({
+          productId: item.product,
+          amount: item.quantity,
+        }));
+        await axios.post(`${STOCK_SERVICE_URL}/batch/confirm`, { items: batchItems });
       }
     } catch (error) {
       logger.error({ err: error }, "Error processing payment.success");

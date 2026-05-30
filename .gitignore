@@ -75,6 +75,7 @@ junit.xml
 
 # --- AI Agents & GSD ---
 .agent/
+.planning/
 .gemini/
 .claude/
 .scratch/

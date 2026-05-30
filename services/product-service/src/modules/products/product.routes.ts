@@ -1,93 +1,7 @@
-
-
-
-// // services/product-service/src/modules/products/product.routes.ts
-// import { Router } from "express";
-// import * as productController from "./product.controller";
-// import { authenticate, authorize } from "@repo/common"
-// import { UserRole } from "@repo/types"
-
-// const router = Router();
-
-// router.route("/")
-//   .get(productController.getAllProducts)
-//   .post(
-//     authenticate, 
-//     // This now works because UserRole is an Enum (a value), not just a type
-//     authorize([UserRole.VENDOR, UserRole.ADMIN]), 
-//     productController.createProduct
-//   );
-
-// router.route("/:id")
-//   .get(productController.getProductById)
-//   .patch(
-//     authenticate, 
-//     authorize([UserRole.VENDOR, UserRole.ADMIN]), 
-//     productController.updateProduct
-//   )
-//   .delete(
-//     authenticate, 
-//     authorize([UserRole.VENDOR, UserRole.ADMIN]), 
-//     productController.deleteProduct
-//   );
-
-// router.patch(
-//   "/:id/toggle-publish", 
-//   authenticate, 
-//   authorize([UserRole.VENDOR, UserRole.ADMIN]), 
-//   productController.togglePublishStatus
-// );
-
-// export default router;
-
-
-// import { Router } from "express";
-// import * as productController from "./product.controller.js"; // Ensure .js if using type: module
-// import { authenticate, authorize } from "@repo/common";
-// import { UserRole } from "@repo/types";
-
-// const router = Router();
-
-// // Routes for "/"
-// router.route("/")
-//   .get(productController.getAllProducts)
-//   .post(
-//     authenticate, 
-//     authorize([UserRole.VENDOR, UserRole.ADMIN]), 
-//     productController.createProduct
-//   );
-
-// // Routes for "/:id"
-// router.route("/:id")
-//   .get(productController.getProductById)
-//   .patch(
-//     authenticate, 
-//     authorize([UserRole.VENDOR, UserRole.ADMIN]), 
-//     productController.updateProduct
-//   )
-//   .delete(
-//     authenticate, 
-//     authorize([UserRole.VENDOR, UserRole.ADMIN]), 
-//     productController.deleteProduct
-//   );
-
-// // Toggle Publish Status
-// router.patch(
-//   "/:id/toggle-publish", 
-//   authenticate, 
-//   authorize([UserRole.VENDOR, UserRole.ADMIN]), 
-//   productController.togglePublishStatus
-// );
-
-// export default router;
-
-
-
-
-
 import { Router, Request, Response } from "express";
 import * as productController from "./product.controller.js";
-import { authenticate, authorize } from "@repo/common";
+import { authenticate, authorize, validateRequest } from "@repo/common";
+import { CreateProductSchema, UpdateProductSchema } from "@repo/api-contracts";
 import { upload, uploadToImageKit } from "@repo/image-storage";
 import { UserRole } from "@repo/types";
 import reviewRoutes from "../reviews/review.routes.js";
@@ -114,6 +28,7 @@ router.route("/")
       { name: "mainImage", maxCount: 1 },
       { name: "subImages", maxCount: 4 }
     ]),
+    validateRequest({ body: CreateProductSchema }),
     // Processes buffers and uploads them to ImageKit
     uploadToImageKit, 
     productController.createProduct
@@ -180,6 +95,7 @@ router.route("/:id")
       { name: "mainImage", maxCount: 1 },
       { name: "subImages", maxCount: 4 }
     ]),
+    validateRequest({ body: UpdateProductSchema }),
     uploadToImageKit,
     productController.updateProduct
   )

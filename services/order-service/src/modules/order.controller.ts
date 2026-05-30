@@ -37,21 +37,26 @@ export const createOrder = async (req: Request, res: Response) => {
       orderStatus: "PENDING",
     });
 
-    // 3. Try to Reserve Stock for each item
+    // 3. Try to Reserve Stock using Batch Endpoint
     try {
-      for (const item of items) {
-        await axios.post(`${STOCK_SERVICE_URL}/${item.product}/reserve`, {
-          amount: item.quantity,
-        });
-        reservedItems.push(item.product); // Track for potential rollback
-      }
+      const batchItems = items.map((item: any) => ({
+        productId: item.product,
+        amount: item.quantity,
+      }));
+
+      await axios.post(`${STOCK_SERVICE_URL}/batch/reserve`, { items: batchItems });
+      // If batch reserve succeeds, all items are reserved.
+      batchItems.forEach((item: any) => reservedItems.push(item.productId));
     } catch (stockError: any) {
-      // ROLLBACK LOGIC: Release already reserved items
-      for (const productId of reservedItems) {
-        const item = items.find((i: any) => i.product === productId);
-        await axios.post(`${STOCK_SERVICE_URL}/${productId}/release`, {
-          amount: item.quantity,
-        }).catch((err: any) => logger.error(`Failed to rollback stock for ${productId}`));
+      // ROLLBACK LOGIC: Release reserved items using Batch Endpoint
+      if (reservedItems.length > 0) {
+        const rollbackItems = reservedItems.map(productId => {
+          const item = items.find((i: any) => i.product === productId);
+          return { productId, amount: item.quantity };
+        });
+
+        await axios.post(`${STOCK_SERVICE_URL}/batch/release`, { items: rollbackItems })
+          .catch((err: any) => logger.error(`Failed to rollback stock for batch`));
       }
 
       // Update order status to CANCELLED

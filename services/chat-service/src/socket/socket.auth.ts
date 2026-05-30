@@ -1,3 +1,4 @@
+import { env } from '../config/env.js';
 import jwt from "jsonwebtoken";
 import type { TypedServer } from "./socket.types";
 import logger from "@repo/logger";
@@ -18,7 +19,7 @@ export function applySocketAuth(io: TypedServer): void {
       : token;
 
     try {
-      const secret = process.env.JWT_ACCESS_SECRET;
+      const secret = env.JWT_ACCESS_SECRET;
       if (!secret) {
         logger.error("Socket handshake failed: JWT secret missing");
         return next(new Error("Server configuration error: JWT secret missing"));

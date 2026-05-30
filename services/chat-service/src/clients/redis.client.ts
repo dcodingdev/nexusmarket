@@ -1,9 +1,10 @@
+import { env } from '../config/env.js';
 import { Redis } from 'ioredis';
 
 let redis: Redis | null = null;
 
 export const getRedisClient = (): Redis => {
-    const redisUrl = process.env.REDIS_URL;
+    const redisUrl = env.REDIS_URL;
     if (!redisUrl) {
         throw new Error('REDIS_URL is not defined');
     }

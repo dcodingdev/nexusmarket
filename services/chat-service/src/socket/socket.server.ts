@@ -1,3 +1,4 @@
+import { env } from '../config/env.js';
 import { Server as HttpServer } from "http";
 import { Server } from "socket.io";
 import { createAdapter } from "@socket.io/redis-adapter";
@@ -13,14 +14,14 @@ export function createSocketServer(httpServer: HttpServer): TypedServer {
   const socketIo = new Server(httpServer, {
     path: "/api/chat/socket.io",
     cors: {
-      origin: process.env.FRONTEND_URL || "http://localhost:3000",
+      origin: env.FRONTEND_URL || "http://localhost:3000",
       credentials: true,
     },
     transports: ["websocket", "polling"],
   }) as TypedServer;
 
   // Apply Redis adapter for horizontal scaling
-  const redisUrl = process.env.REDIS_URL;
+  const redisUrl = env.REDIS_URL;
   if (redisUrl) {
     try {
       const pubClient = new Redis(redisUrl, {

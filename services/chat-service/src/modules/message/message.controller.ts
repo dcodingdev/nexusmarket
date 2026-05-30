@@ -1,8 +1,11 @@
 import { asyncHandler } from '@repo/common';
 import { Request, Response } from 'express';
 import { messageService } from './message.service';
-import { createMessageBodySchema, listMessagesQuerySchema } from './message.schema';
-import { conversationIdParamsSchema } from '../conversation/conversation.schema';
+import { 
+    createMessageBodySchema, 
+    listMessagesQuerySchema,
+    conversationIdParamsSchema 
+} from '@repo/api-contracts';
 import { getAuthenticatedUser } from '@/utils/auth';
 
 const getValidatedId = (params: unknown): string => {

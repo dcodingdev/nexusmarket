@@ -5,7 +5,7 @@ import {
     createConversationSchema,
     listConversationsQuerySchema,
     conversationIdParamsSchema,
-} from './conversation.schema';
+} from '@repo/api-contracts';
 
 const router = Router();
 

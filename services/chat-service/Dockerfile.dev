@@ -1,22 +1,45 @@
-FROM node:20-alpine
-RUN npm install -g pnpm tsx
+# ---------- 1. DEPS STAGE ----------
+FROM node:20-alpine AS deps
 WORKDIR /app
+RUN npm install -g pnpm
 
-# 1. Copy root workspace files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig*.json ./
-
-# 2. Copy ALL package.json files from the packages directory
-COPY packages/ ./packages/
-# This is the trick: Copy ALL service package.json files so the workspace is valid
+COPY pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY package.json ./
+COPY packages/api-contracts/package.json ./packages/api-contracts/
+COPY packages/common/package.json ./packages/common/
+COPY packages/config/package.json ./packages/config/
+COPY packages/database/package.json ./packages/database/
+COPY packages/logger/package.json ./packages/logger/
+COPY packages/rabbitmq/package.json ./packages/rabbitmq/
+COPY packages/types/package.json ./packages/types/
 COPY services/chat-service/package.json ./services/chat-service/
 
-# Now run install (it will find @repo/auth-service now)
-RUN pnpm install --no-frozen-lockfile --shamefully-hoist
+RUN pnpm install --filter @repo/chat-service... --frozen-lockfile
 
-# 3. Copy the source code for the shared packages
-COPY packages/ ./packages/
+# Ensure node_modules exist for all packages (create empty if hoisted)
+RUN mkdir -p \
+    /app/packages/api-contracts/node_modules \
+    /app/packages/common/node_modules \
+    /app/packages/config/node_modules \
+    /app/packages/database/node_modules \
+    /app/packages/logger/node_modules \
+    /app/packages/rabbitmq/node_modules \
+    /app/packages/types/node_modules \
+    /app/services/chat-service/node_modules
 
-# 4. Set the workdir to the specific service
-WORKDIR /app/services/chat-service
-# Note: We don't COPY the service source because it's handled by Docker Volumes in dev
-CMD ["pnpm", "run", "dev"]
+# ---------- 2. DEV RUNNER ----------
+FROM node:20-alpine
+WORKDIR /app
+RUN npm install -g pnpm tsx
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/packages/api-contracts/node_modules ./packages/api-contracts/node_modules
+COPY --from=deps /app/packages/common/node_modules ./packages/common/node_modules
+COPY --from=deps /app/packages/config/node_modules ./packages/config/node_modules
+COPY --from=deps /app/packages/database/node_modules ./packages/database/node_modules
+COPY --from=deps /app/packages/logger/node_modules ./packages/logger/node_modules
+COPY --from=deps /app/packages/rabbitmq/node_modules ./packages/rabbitmq/node_modules
+COPY --from=deps /app/packages/types/node_modules ./packages/types/node_modules
+COPY --from=deps /app/services/chat-service/node_modules ./services/chat-service/node_modules
+
+CMD ["pnpm", "--filter", "@repo/chat-service", "run", "dev"]

@@ -44,7 +44,11 @@ function LoginContent() {
   });
 
   const onSubmit = async (data: LoginFormValues) => {
-    await login(data);
+    try {
+      await login(data);
+    } catch (err: any) {
+      form.setError('root', { message: err.message || 'Login failed' });
+    }
   };
 
   const handleDemoLogin = async (role: 'customer' | 'vendor' | 'admin') => {
@@ -62,15 +66,10 @@ function LoginContent() {
     } catch (err: any) {
       if (role !== 'admin') {
         try {
-          const regRes = await fetch('http://localhost:8000/api/v1/auth/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(account),
-          });
-          if (regRes.ok) {
-            await login({ email: account.email, password: account.password });
-            return;
-          }
+          const { authClient } = await import('@/lib/auth');
+          await authClient.register(account as any);
+          await login({ email: account.email, password: account.password });
+          return;
         } catch (regErr) {
           console.error(regErr);
         }

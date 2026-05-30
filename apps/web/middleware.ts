@@ -46,13 +46,36 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  // 3. Purchasing Power Parity (PPP) Engine
+  const response = NextResponse.next();
+  
+  // Extract country from headers (e.g. Vercel's x-vercel-ip-country)
+  const country = request.headers.get('x-vercel-ip-country') || 
+                  request.headers.get('cf-ipcountry') || 
+                  'US';
+
+  // Set country cookie for frontend consumption if not already set or changed
+  const currentPppCookie = request.cookies.get('ppp_country')?.value;
+  if (currentPppCookie !== country) {
+    response.cookies.set('ppp_country', country, { 
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      sameSite: 'lax',
+    });
+  }
+
+  return response;
 }
 
 export const config = {
   matcher: [
-    '/vendor/:path*',
-    '/admin/:path*',
-    '/account/:path*',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };

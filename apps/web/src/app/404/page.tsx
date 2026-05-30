@@ -1,4 +1,4 @@
-import NotFoundView from "@/components/modules/errors/NotFoundView";
+import NotFoundView from "@/modules/errors/NotFoundView";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

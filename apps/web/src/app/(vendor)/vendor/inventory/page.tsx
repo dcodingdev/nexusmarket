@@ -47,28 +47,41 @@ export default function InventoryPage() {
   const products = data?.docs || [];
   const { selectedIds, toggle, selectAll, clear, isSelected, count } = useSelection();
 
-  const handleExport = (ids?: string[]) => {
+  const handleExport = async (ids?: string[]) => {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
     let url = `${baseUrl}/products/export?vendorId=${vendorId}`;
-    
-    // Add auth token if needed? The backend authenticate middleware uses cookie or header.
-    // window.open doesn't send custom headers. I might need a more complex download logic
-    // if auth is strictly required via header. But if it's cookie-based, it works.
-    // If not, I can use a hidden form or fetch blob.
     
     if (ids && ids.length > 0) {
       ids.forEach(id => url += `&ids=${id}`);
     }
     
-    // Using a link click for better download behavior
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `products-${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    
-    toast.success(`Exporting ${ids ? ids.length : 'all'} products...`);
+    try {
+      toast.info(`Exporting ${ids ? ids.length : 'all'} products...`);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${useAuthStore.getState().accessToken}`
+        }
+      });
+      
+      if (!response.ok) throw new Error('Export failed');
+      
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.setAttribute('download', `products-${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+      
+      toast.success(`Successfully exported products`);
+    } catch (error) {
+      toast.error('Failed to export products');
+      console.error(error);
+    }
   };
 
   const handleAddProduct = (formData: any) => {

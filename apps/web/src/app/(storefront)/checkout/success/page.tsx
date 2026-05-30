@@ -61,10 +61,8 @@ function SuccessContent() {
           <div className="flex justify-between">
             <span className="text-muted-foreground">Mode</span>
             <span className="text-foreground font-medium">
-              {paymentIntent.startsWith("pi_mock_") || paymentIntent.startsWith("order_mock_")
+              {paymentIntent.startsWith("pi_mock_") || paymentIntent.startsWith("session_mock_")
                 ? "Sandbox simulation"
-                : searchParams.get("gateway") === "RAZORPAY" || paymentIntent.startsWith("order_")
-                ? "Razorpay secure"
                 : "Stripe secure"}
             </span>
           </div>

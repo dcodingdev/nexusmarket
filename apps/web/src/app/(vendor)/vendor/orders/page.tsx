@@ -1,4 +1,4 @@
-import VendorOrderManager from "@/components/modules/orders/VendorOrderManager";
+import VendorOrderManager from "@/modules/orders/VendorOrderManager";
 
 export const metadata = {
   title: "Vendor Orders - NexusMarket",

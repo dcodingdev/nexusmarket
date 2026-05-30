@@ -1,7 +1,8 @@
-import "dotenv/config.js";
+
 import express, { Application } from "express";
 import cors from "cors";
 import { Server } from "http";
+import { env } from "./config/env.js";
 
 import logger from "@repo/logger";
 import { connectDatabase, mongoose } from "@repo/database";
@@ -12,8 +13,8 @@ import { initOrderConsumers } from "./config/order.consumer.js";
 import orderRoutes from "./modules/order.routes.js";
 
 const app: Application = express();
-const PORT = process.env.PORT || 4003;
-const ORDER_MONGO_URI= process.env.ORDER_MONGO_URI!
+const PORT = env.PORT || 4003;
+const ORDER_MONGO_URI = env.MONGO_URI;
 
 let server: Server;
 
@@ -63,12 +64,12 @@ process.on("SIGINT", () => shutdown("SIGINT"));
  */
 const start = async () => {
   try {
-    if (!process.env.ORDER_MONGO_URI || !process.env.RABBITMQ_URL) {
+    if (!env.MONGO_URI || !env.RABBITMQ_URL) {
       throw new Error("Missing MONGO_URI or RABBITMQ_URL");
     }
 
-    await connectDatabase(ORDER_MONGO_URI);
-    await connectRMQ(process.env.RABBITMQ_URL);
+    await connectDatabase(ORDER_MONGO_URI!);
+    await connectRMQ(env.RABBITMQ_URL);
     
     // Initialize RabbitMQ Listeners for Payment Success/Fail
     await initOrderConsumers();

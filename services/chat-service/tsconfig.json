@@ -38,7 +38,8 @@
       "@repo/logger": ["../../packages/logger/src/index.ts"],
       "@repo/database": ["../../packages/database/src/index.ts"],
       "@repo/rabbitmq": ["../../packages/rabbitmq/src/index.ts"],
-      "@repo/auth-service": ["../auth-service/index.ts"]
+      "@repo/auth-service": ["../auth-service/index.ts"],
+      "@repo/common": ["../../packages/common/src/index.ts"]
     }
   },
   "include": [

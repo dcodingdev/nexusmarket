@@ -1,8 +1,11 @@
 import { Router } from 'express';
 import { attachAuthenticatedUser, validateRequest } from '@repo/common';
 import * as controller from './message.controller';
-import { createMessageBodySchema, listMessagesQuerySchema } from './message.schema';
-import { conversationIdParamsSchema } from '../conversation/conversation.schema';
+import { 
+    createMessageBodySchema, 
+    listMessagesQuerySchema,
+    conversationIdParamsSchema 
+} from '@repo/api-contracts';
 
 const router = Router();
 

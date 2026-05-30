@@ -2,9 +2,9 @@ import { RequestHandler } from 'express';
 import { ZodType, ZodError } from 'zod';
 
 interface ValidationSchema {
-  body?: ZodType<any>;
-  query?: ZodType<any>;
-  params?: ZodType<any>;
+  body?: any;
+  query?: any;
+  params?: any;
 }
 
 export const validateRequest = (schema: ValidationSchema): RequestHandler => {

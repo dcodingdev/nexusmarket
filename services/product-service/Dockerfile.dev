@@ -1,11 +1,10 @@
-FROM node:20-alpine
-RUN npm install -g pnpm tsx
+# ---------- 1. DEPS STAGE ----------
+FROM node:20-alpine AS deps
 WORKDIR /app
+RUN npm install -g pnpm
 
-# 1. Copy root workspace files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig*.json ./
-
-# 2. Copy all package.json files to preserve workspace structure
+COPY pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY package.json ./
 COPY packages/api-contracts/package.json ./packages/api-contracts/
 COPY packages/common/package.json ./packages/common/
 COPY packages/config/package.json ./packages/config/
@@ -14,21 +13,35 @@ COPY packages/image-storage/package.json ./packages/image-storage/
 COPY packages/logger/package.json ./packages/logger/
 COPY packages/rabbitmq/package.json ./packages/rabbitmq/
 COPY packages/types/package.json ./packages/types/
-
-COPY services/auth-service/package.json ./services/auth-service/
-COPY services/chat-service/package.json ./services/chat-service/
-COPY services/email-service/package.json ./services/email-service/
-COPY services/order-service/package.json ./services/order-service/
-COPY services/payment-service/package.json ./services/payment-service/
 COPY services/product-service/package.json ./services/product-service/
 
-# Now run install (it will find @repo/auth-service now)
-RUN pnpm install --no-frozen-lockfile --shamefully-hoist
+RUN pnpm install --filter @repo/product-service... --frozen-lockfile
 
-# 3. Copy the source code for the shared packages
-COPY packages/ ./packages/
+RUN mkdir -p \
+    /app/packages/api-contracts/node_modules \
+    /app/packages/common/node_modules \
+    /app/packages/config/node_modules \
+    /app/packages/database/node_modules \
+    /app/packages/image-storage/node_modules \
+    /app/packages/logger/node_modules \
+    /app/packages/rabbitmq/node_modules \
+    /app/packages/types/node_modules \
+    /app/services/product-service/node_modules
 
-# 4. Set the workdir to the specific service
-WORKDIR /app/services/product-service
-# Note: We don't COPY the service source because it's handled by Docker Volumes in dev
-CMD ["pnpm", "run", "dev"]
+# ---------- 2. DEV RUNNER ----------
+FROM node:20-alpine
+WORKDIR /app
+RUN npm install -g pnpm tsx
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/packages/api-contracts/node_modules ./packages/api-contracts/node_modules
+COPY --from=deps /app/packages/common/node_modules ./packages/common/node_modules
+COPY --from=deps /app/packages/config/node_modules ./packages/config/node_modules
+COPY --from=deps /app/packages/database/node_modules ./packages/database/node_modules
+COPY --from=deps /app/packages/image-storage/node_modules ./packages/image-storage/node_modules
+COPY --from=deps /app/packages/logger/node_modules ./packages/logger/node_modules
+COPY --from=deps /app/packages/rabbitmq/node_modules ./packages/rabbitmq/node_modules
+COPY --from=deps /app/packages/types/node_modules ./packages/types/node_modules
+COPY --from=deps /app/services/product-service/node_modules ./services/product-service/node_modules
+
+CMD ["pnpm", "--filter", "@repo/product-service", "run", "dev"]

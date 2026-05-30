@@ -51,12 +51,29 @@ export const conversationService = {
         return conversation;
     },
 
-    async listConversation(filter: ConversationFilter): Promise<ConversationSummary[]> {
+    async listConversation(filter: ConversationFilter): Promise<{ data: ConversationSummary[], pagination: any }> {
+        const page = filter.page || 1;
+        const limit = filter.limit || 10;
+        const skip = (page - 1) * limit;
+
         const results = await ConversationModel.find({ 
             participantIds: filter.participantId 
-        }).sort({ lastMessageAt: -1, updatedAt: -1 });
+        })
+        .sort({ lastMessageAt: -1, updatedAt: -1 })
+        .skip(skip)
+        .limit(limit);
 
-        return results.map(toConversation);
+        const total = await ConversationModel.countDocuments({ participantIds: filter.participantId });
+
+        return {
+            data: results.map(toConversation),
+            pagination: {
+                total,
+                page,
+                limit,
+                pages: Math.ceil(total / limit)
+            }
+        };
     },
 
     async touchConversation(conversationId: string, preview: string): Promise<void> {

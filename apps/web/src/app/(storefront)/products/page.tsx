@@ -12,7 +12,7 @@ import Link from 'next/link';
 export default function ProductsPage() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const limit = 4;
+  const limit = 6;
 
   const { data, isLoading, error } = useProducts({ search, page, limit });
 
@@ -55,7 +55,7 @@ export default function ProductsPage() {
 
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {[...Array(8)].map((_, i) => (
+          {[...Array(6)].map((_, i) => (
             <div key={i} className="aspect-[4/5] animate-pulse rounded-lg bg-muted" />
           ))}
         </div>
@@ -82,7 +82,7 @@ export default function ProductsPage() {
                     mainImage: product.mainImage,
                     vendor: product.vendor
                   }} 
-                  priority={index < 8}
+                  priority={index < 6}
                 />
               </Link>
             ))}

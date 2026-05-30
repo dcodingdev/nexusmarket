@@ -3,6 +3,9 @@ import * as orderController from "./order.controller.js";
 import { authorize, authenticate } from "@repo/common"
 import { UserRole } from "@repo/types";
 
+import { CreateOrderSchema } from "@repo/api-contracts";
+import { validateRequest } from "@repo/common";
+
 const router = Router();
 
 /**
@@ -16,7 +19,7 @@ router.route("/")
    * @desc    Place a new order & reserve stock
    * @access  Private (All Roles)
    */
-  .post(orderController.createOrder);
+  .post(validateRequest({ body: CreateOrderSchema }), orderController.createOrder);
 
 router.route("/me")
   /**

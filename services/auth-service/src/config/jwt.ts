@@ -1,7 +1,9 @@
 import jwt from 'jsonwebtoken';
 
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'access_secret';
-const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh_secret';
+import { env } from './env.js';
+
+const ACCESS_SECRET = env.JWT_ACCESS_SECRET;
+const REFRESH_SECRET = env.JWT_REFRESH_SECRET;
 
 export const generateTokens = (payload: { id: string; role: string }) => {
   const accessToken = jwt.sign(payload, ACCESS_SECRET, { expiresIn: '15m' });

@@ -5,6 +5,7 @@ import { ShoppingCart } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useCartStore } from '@/stores/cart-store';
+import { useWishlistStore } from '@/stores/wishlist-store';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -27,6 +28,26 @@ interface ProductCardProps {
 export function ProductCard({ product, priority = false }: ProductCardProps) {
   const router = useRouter();
   const addItem = useCartStore((state) => state.addItem);
+  const { addItem: addWishlist, removeItem: removeWishlist, isLiked } = useWishlistStore();
+  const liked = isLiked(product.id);
+
+  const toggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (liked) {
+      removeWishlist(product.id);
+    } else {
+      addWishlist({
+        product: product.id,
+        vendor: product.vendor.id || 'unknown_vendor',
+        price: product.price,
+        name: product.name,
+        image: product.mainImage.url,
+      });
+      toast.success(`${product.name} added to liked products!`);
+    }
+  };
+
   return (
     <div className="group relative overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-all hover:shadow-md hover:-translate-y-1 mb-8">
       {/* Image Container */}
@@ -38,6 +59,26 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           priority={priority}
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
+        {/* Wishlist Button */}
+        <Button
+          variant="secondary"
+          size="icon"
+          className={`absolute top-2 right-2 h-8 w-8 rounded-full shadow-md z-10 transition-colors duration-300 ${liked ? 'text-red-500 bg-white hover:bg-white/90' : 'text-muted-foreground bg-white/70 hover:bg-white'}`}
+          onClick={toggleWishlist}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill={liked ? "currentColor" : "none"}
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-4 h-4"
+          >
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+          </svg>
+        </Button>
         
         {/* Quick Add Overlay */}
         <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
@@ -57,7 +98,6 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
                 image: product.mainImage.url,
               });
               toast.success(`${product.name} added to cart!`);
-              router.push('/checkout');
             }}
           >
             <ShoppingCart className="h-4 w-4" />

@@ -1,8 +1,9 @@
+import { env } from '../config/env.js';
 import { MongoClient } from 'mongodb';
 
 let client: MongoClient | null = null;
 
-const mongoUri = process.env.CHAT_MONGO_URI || process.env.MONGO_URI;
+const mongoUri = env.MONGO_URI;
 if (!mongoUri) {
     throw new Error('CHAT_MONGO_URI or MONGO_URI is not defined');
 }

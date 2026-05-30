@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { authenticate, authorize } from '@repo/common'; // ✅ Clean workspace import
 import { UserRole } from '@repo/types';
-import { getProfile, updateProfile, getAllUsers, toggleUserSuspension } from './user.controller.js';
+import { getProfile, updateProfile, getAllUsers, toggleUserSuspension, upgradeToVendor } from './user.controller.js';
 
 const router: Router = Router();
 
@@ -16,6 +16,9 @@ router.get('/profile', authenticate, getProfile);
 
 // PATCH /api/users/profile
 router.patch('/profile', authenticate, updateProfile);
+
+// POST /api/users/upgrade-to-vendor
+router.post('/upgrade-to-vendor', authenticate, upgradeToVendor);
 
 /**
  * Admin Oversight Routes

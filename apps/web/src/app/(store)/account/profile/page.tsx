@@ -62,14 +62,6 @@ export default function ProfilePage() {
     setIsSaving(true);
     setMessage("");
     try {
-      // Assuming you have an endpoint /api/auth/profile or /api/users/profile
-      // For now, we will mock the API call and just update the store
-      // const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_SERVICE_URL}/profile`, {
-      //   method: 'PATCH',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(data)
-      // });
-      // const updatedUser = await res.json();
       
       // Update local store
       updateUser({

@@ -4,8 +4,9 @@ import { RegisterInput, LoginInput } from '@repo/api-contracts';
 import { UserRepository } from '../users/user.repository.js';
 import { User } from '@repo/types';
 
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'access_secret';
-const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh_secret';
+import { env } from '../../config/env.js';
+const ACCESS_SECRET = env.JWT_ACCESS_SECRET;
+const REFRESH_SECRET = env.JWT_REFRESH_SECRET;
 
 const mapToUser = (user: any): User => ({
   _id: user._id.toString(),
@@ -22,6 +23,7 @@ export const registerUser = async (data: RegisterInput): Promise<User> => {
   // Overwrite the plain text password with the hashed one
   const user = await UserRepository.create({
     ...data,
+    role: 'customer', // Force customer role for all public signups
     password: hashedPassword,
   });
 

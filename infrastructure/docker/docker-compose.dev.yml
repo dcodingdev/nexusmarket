@@ -1,40 +1,66 @@
+name: ecommerce-app
+
+networks:
+  app-network:
+    driver: bridge
 
 services:
-  # --- API Gateway ---
-  nginx:
-    image: nginx:stable-alpine
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
     ports:
-      - "80:80"
-    volumes:
-      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - auth-service
-      - product-service
-      - order-service
-      - payment-service
-      - email-service
-      - chat-service
+      - "5672:5672"
+      - "15672:15672"
     networks:
       - app-network
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "check_running" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
-  # --- Microservices (Dev Mode) ---
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   auth-service:
     build:
       context: ../../
       dockerfile: services/auth-service/Dockerfile.dev
-    container_name: auth-service-dev
-  
+    container_name: ecommerce-auth-dev
+    command: pnpm --filter @repo/auth-service run dev
     volumes:
       - ../../:/app
-      # Anonymous volumes to protect the container's node_modules
-      - /app/node_modules
-      - /app/services/auth-service/node_modules
-      # Add this to ensure binaries in the root are accessible
-      - /app/node_modules/.bin:/app/services/auth-service/node_modules/.bin
+      - auth_root_nm:/app/node_modules
+      - auth_svc_nm:/app/services/auth-service/node_modules
+      - auth_pkg_api_nm:/app/packages/api-contracts/node_modules
+      - auth_pkg_common_nm:/app/packages/common/node_modules
+      - auth_pkg_config_nm:/app/packages/config/node_modules
+      - auth_pkg_db_nm:/app/packages/database/node_modules
+      - auth_pkg_logger_nm:/app/packages/logger/node_modules
+      - auth_pkg_rabbit_nm:/app/packages/rabbitmq/node_modules
+      - auth_pkg_types_nm:/app/packages/types/node_modules
     environment:
-      - PORT=4001
+      - NODE_ENV=development
+      - AUTH_PORT=4001
+      - AUTH_MONGO_URI=${AUTH_DB_URI}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - CLIENT_URL=${CLIENT_URL}
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
-      - MONGO_URI=${AUTH_DB_URI}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -42,16 +68,33 @@ services:
     build:
       context: ../../
       dockerfile: services/product-service/Dockerfile.dev
-    container_name: product-service-dev
+    container_name: ecommerce-product-dev
+    command: pnpm --filter @repo/product-service run dev
     volumes:
       - ../../:/app
-      - /app/node_modules
-      - /app/services/product-service/node_modules
-      - /app/packages/logger/node_modules
-      - /app/packages/database/node_modules
+      - product_root_nm:/app/node_modules
+      - product_svc_nm:/app/services/product-service/node_modules
+      - product_pkg_api_nm:/app/packages/api-contracts/node_modules
+      - product_pkg_common_nm:/app/packages/common/node_modules
+      - product_pkg_config_nm:/app/packages/config/node_modules
+      - product_pkg_db_nm:/app/packages/database/node_modules
+      - product_pkg_img_nm:/app/packages/image-storage/node_modules
+      - product_pkg_logger_nm:/app/packages/logger/node_modules
+      - product_pkg_rabbit_nm:/app/packages/rabbitmq/node_modules
+      - product_pkg_types_nm:/app/packages/types/node_modules
     environment:
-      - PORT=4002
-      - MONGO_URI=${PRODUCT_DB_URI}
+      - NODE_ENV=development
+      - PRODUCT_PORT=4002
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - PRODUCT_MONGO_URI=${PRODUCT_DB_URI}
+      - IMAGEKIT_PUBLIC_KEY=${IMAGEKIT_PUBLIC_KEY}
+      - IMAGEKIT_PRIVATE_KEY=${IMAGEKIT_PRIVATE_KEY}
+      - IMAGEKIT_URL_ENDPOINT=${IMAGEKIT_URL_ENDPOINT}
+      - CLIENT_URL=${CLIENT_URL}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -59,16 +102,29 @@ services:
     build:
       context: ../../
       dockerfile: services/order-service/Dockerfile.dev
-    container_name: order-service-dev
+    container_name: ecommerce-order-dev
+    command: pnpm --filter @repo/order-service run dev
     volumes:
       - ../../:/app
-      - /app/node_modules
-      - /app/services/order-service/node_modules
-      - /app/packages/rabbitmq/node_modules
+      - order_root_nm:/app/node_modules
+      - order_svc_nm:/app/services/order-service/node_modules
+      - order_pkg_api_nm:/app/packages/api-contracts/node_modules
+      - order_pkg_common_nm:/app/packages/common/node_modules
+      - order_pkg_config_nm:/app/packages/config/node_modules
+      - order_pkg_db_nm:/app/packages/database/node_modules
+      - order_pkg_logger_nm:/app/packages/logger/node_modules
+      - order_pkg_rabbit_nm:/app/packages/rabbitmq/node_modules
+      - order_pkg_types_nm:/app/packages/types/node_modules
     environment:
-      - PORT=4003
+      - NODE_ENV=development
+      - ORDER_PORT=4003
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
-      - MONGO_URI=${ORDER_DB_URI}
+      - ORDER_MONGO_URI=${ORDER_DB_URI}
+      - CLIENT_URL=${CLIENT_URL}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -76,30 +132,31 @@ services:
     build:
       context: ../../
       dockerfile: services/payment-service/Dockerfile.dev
-    container_name: payment-service-dev
+    container_name: ecommerce-payment-dev
+    command: pnpm --filter @repo/payment-service run dev
     volumes:
       - ../../:/app
-      - /app/node_modules
-      - /app/services/payment-service/node_modules
+      - payment_root_nm:/app/node_modules
+      - payment_svc_nm:/app/services/payment-service/node_modules
+      - payment_pkg_api_nm:/app/packages/api-contracts/node_modules
+      - payment_pkg_common_nm:/app/packages/common/node_modules
+      - payment_pkg_config_nm:/app/packages/config/node_modules
+      - payment_pkg_db_nm:/app/packages/database/node_modules
+      - payment_pkg_logger_nm:/app/packages/logger/node_modules
+      - payment_pkg_rabbit_nm:/app/packages/rabbitmq/node_modules
+      - payment_pkg_types_nm:/app/packages/types/node_modules
     environment:
-      - PORT=4004
-      - MONGO_URI=${PAYMENT_DB_URI}
-    networks:
-      - app-network
-
-  email-service:
-    build:
-      context: ../../
-      dockerfile: services/email-service/Dockerfile.dev
-    container_name: email-service-dev
-    volumes:
-      - ../../:/app
-      - /app/node_modules
-      - /app/services/email-service/node_modules
-      - /app/packages/rabbitmq/node_modules
-    environment:
-      - PORT=4005
+      - NODE_ENV=development
+      - PAYMENT_PORT=4004
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - PAYMENT_MONGO_URI=${PAYMENT_DB_URI}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - CLIENT_URL=${CLIENT_URL}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -107,34 +164,97 @@ services:
     build:
       context: ../../
       dockerfile: services/chat-service/Dockerfile.dev
-    container_name: chat-service-dev
+    container_name: ecommerce-chat-dev
+    command: pnpm --filter @repo/chat-service run dev
     volumes:
       - ../../:/app
-      - /app/node_modules
-      - /app/services/chat-service/node_modules
+      - chat_root_nm:/app/node_modules
+      - chat_svc_nm:/app/services/chat-service/node_modules
+      - chat_pkg_api_nm:/app/packages/api-contracts/node_modules
+      - chat_pkg_common_nm:/app/packages/common/node_modules
+      - chat_pkg_config_nm:/app/packages/config/node_modules
+      - chat_pkg_db_nm:/app/packages/database/node_modules
+      - chat_pkg_logger_nm:/app/packages/logger/node_modules
+      - chat_pkg_rabbit_nm:/app/packages/rabbitmq/node_modules
+      - chat_pkg_types_nm:/app/packages/types/node_modules
     environment:
-      - PORT=4006
-      - MONGO_URI=${CHAT_DB_URI}
+      - NODE_ENV=development
+      - CHAT_PORT=4006
+      - CHAT_MONGO_URI=${CHAT_DB_URI}
+      - REDIS_URL=redis://redis:6379
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - app-network
 
-  # --- Infrastructure ---
-  redis:
-    image: redis/redis-stack-server:latest
-    networks:
-      - app-network
-
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
+  nginx:
+    image: nginx:stable-alpine
+    container_name: ecommerce-nginx
     ports:
-      - "15672:15672"
-      - "5672:5672"
-    environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
+      - "8000:80"
+    volumes:
+      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - auth-service
+      - product-service
+      - order-service
+      - payment-service
+      - chat-service
     networks:
       - app-network
 
-networks:
-  app-network:
-    driver: bridge
+volumes:
+  auth_root_nm:
+  auth_svc_nm:
+  auth_pkg_api_nm:
+  auth_pkg_common_nm:
+  auth_pkg_config_nm:
+  auth_pkg_db_nm:
+  auth_pkg_logger_nm:
+  auth_pkg_rabbit_nm:
+  auth_pkg_types_nm:
+
+  product_root_nm:
+  product_svc_nm:
+  product_pkg_api_nm:
+  product_pkg_common_nm:
+  product_pkg_config_nm:
+  product_pkg_db_nm:
+  product_pkg_img_nm:
+  product_pkg_logger_nm:
+  product_pkg_rabbit_nm:
+  product_pkg_types_nm:
+
+  order_root_nm:
+  order_svc_nm:
+  order_pkg_api_nm:
+  order_pkg_common_nm:
+  order_pkg_config_nm:
+  order_pkg_db_nm:
+  order_pkg_logger_nm:
+  order_pkg_rabbit_nm:
+  order_pkg_types_nm:
+
+  payment_root_nm:
+  payment_svc_nm:
+  payment_pkg_api_nm:
+  payment_pkg_common_nm:
+  payment_pkg_config_nm:
+  payment_pkg_db_nm:
+  payment_pkg_logger_nm:
+  payment_pkg_rabbit_nm:
+  payment_pkg_types_nm:
+
+  chat_root_nm:
+  chat_svc_nm:
+  chat_pkg_api_nm:
+  chat_pkg_common_nm:
+  chat_pkg_config_nm:
+  chat_pkg_db_nm:
+  chat_pkg_logger_nm:
+  chat_pkg_rabbit_nm:
+  chat_pkg_types_nm:

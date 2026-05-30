@@ -1,7 +1,10 @@
 import { Router } from "express";
 import * as paymentController from "./payment.controller.js";
 // ✅ Clean import from shared common package
-import { authenticate } from "@repo/common";
+import { authenticate, validateRequest } from "@repo/common";
+import { CreatePaymentSessionSchema } from "@repo/api-contracts";
+
+import { pppMiddleware } from "../../middleware/ppp.middleware.js";
 
 const router = Router();
 
@@ -13,7 +16,9 @@ const router = Router();
 router.route("/process")
   .post(
     authenticate, 
-    paymentController.createPaymentIntent
+    pppMiddleware,
+    validateRequest({ body: CreatePaymentSessionSchema }),
+    paymentController.createPaymentSession
   );
 
 router.route("/mock-confirm")

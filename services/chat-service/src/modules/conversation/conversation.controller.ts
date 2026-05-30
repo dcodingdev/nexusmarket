@@ -5,7 +5,7 @@ import {
     createConversationSchema,
     conversationIdParamsSchema,
     listConversationsQuerySchema,
-} from './conversation.schema';
+} from '@repo/api-contracts';
 import { getAuthenticatedUser } from '@/utils/auth';
 import { mongoose } from '@repo/database';
 
@@ -53,12 +53,15 @@ export const createConversationHandler = asyncHandler(async (req: Request, res: 
 
 export const listConversationHandler = asyncHandler(async (req: Request, res: Response) => {
     const user = getAuthenticatedUser(req);
+    const { page, limit } = req.query;
 
-    const conversations = await conversationService.listConversation({
-        participantId: user._id
+    const result = await conversationService.listConversation({
+        participantId: user._id,
+        page: page ? Number(page) : undefined,
+        limit: limit ? Number(limit) : undefined
     });
 
-    res.status(200).json({ data: conversations });
+    res.status(200).json({ success: true, ...result });
 });
 
 export const getConversationHandler = asyncHandler(async (req: Request, res: Response) => {

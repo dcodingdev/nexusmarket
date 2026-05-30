@@ -1,4 +1,5 @@
-import "dotenv/config.js";
+import { env } from './config/env.js';
+
 import express, { Application } from "express";
 import cors from "cors";
 import { createServer, Server } from "http";
@@ -11,7 +12,7 @@ import conversationRoutes from "./modules/conversation/conversation.routes";
 import messageRoutes from "./modules/message/message.routes";
 
 const app: Application = express();
-const PORT = process.env.CHAT_PORT || 4006;
+const PORT = env.CHAT_PORT || 4006;
 
 let server: Server;
 
@@ -33,7 +34,7 @@ app.use("/api/chat", router);
 const start = async () => {
   try {
     // Connect to clients
-    const mongoUri = process.env.CHAT_MONGO_URI || process.env.MONGO_URI;
+    const mongoUri = env.MONGO_URI;
     if (!mongoUri) throw new Error("CHAT_MONGO_URI or MONGO_URI is not defined");
     await connectDatabase(mongoUri);
     await getMongoClient();

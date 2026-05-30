@@ -1,32 +1,3 @@
-// import { Request, Response } from "express";
-// import { mongoose } from "@repo/database"; // Import mongoose to use Types.ObjectId
-// import * as paymentService from "./payment.service";
-
-// export const createPayment = async (req: Request, res: Response) => {
-//   try {
-//     const { orderId, amount, gateway } = req.body;
-//     const user = req.user;
-
-//     if (!user) {
-//       return res.status(401).json({ success: false, message: "Unauthorized" });
-//     }
-
-//     // Explicitly cast strings to ObjectIds to satisfy the IPayment interface
-//     const payment = await paymentService.processPaymentLogic({
-//       orderId: new mongoose.Types.ObjectId(orderId),
-//       customerId: new mongoose.Types.ObjectId(user._id),
-//       amount,
-//       gateway,
-//     });
-
-//     res.status(200).json({ success: true, data: payment });
-//   } catch (error: any) {
-//     // Handle cases where orderId string is not a valid ObjectId format
-//     res.status(400).json({ success: false, message: error.message });
-//   }
-// };
-
-
 import { Payment } from "./payment.model.js";
 import { Request, Response } from "express";
 import { mongoose } from "@repo/database";
@@ -34,21 +5,31 @@ import * as paymentService from "./payment.service.js";
 import { stripe } from "../../config/gateway.js";
 import crypto from "node:crypto";
 
-export const createPaymentIntent = async (req: Request, res: Response) => {
+export const createPaymentSession = async (req: Request, res: Response) => {
   const { orderId, amount, gateway, currency = "USD" } = req.body;
   
+  // Apply PPP discount if available
+  let finalAmount = amount;
+  let appliedMultiplier = 1.0;
+
+  if (req.pppData && req.pppData.multiplier < 1.0) {
+    appliedMultiplier = req.pppData.multiplier;
+    finalAmount = Math.round(amount * appliedMultiplier);
+  }
+
   try {
     let gatewayResponse;
     if (gateway === "STRIPE") {
-      gatewayResponse = await paymentService.createStripeIntent(amount, currency);
+      gatewayResponse = await paymentService.createStripeSession(finalAmount, currency, orderId, req.user!._id.toString());
     } else {
-      gatewayResponse = await paymentService.createRazorpayOrder(amount, currency);
+      // Fallback to Stripe if paypal/other isn't implemented yet, or throw error
+      throw new Error(`Gateway ${gateway} is not implemented`);
     }
 
     const payment = await Payment.create({
       orderId: new mongoose.Types.ObjectId(orderId),
       customerId: new mongoose.Types.ObjectId(req.user!._id),
-      amount,
+      amount: finalAmount, // Store the discounted amount
       gateway,
       transactionId: gatewayResponse.id,
       status: "PENDING",
@@ -80,33 +61,14 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  if (event.type === "payment_intent.succeeded") {
-    const intent = event.data.object as any;
-    await paymentService.finalizePayment(intent.id);
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as any;
+    await paymentService.finalizePayment(session.id);
   }
 
   res.json({ received: true });
 };
 
-// RAZORPAY WEBHOOK
-export const handleRazorpayWebhook = async (req: Request, res: Response) => {
-  const secret = process.env.RAZORPAY_WEBHOOK_SECRET!;
-  const signature = req.headers["x-razorpay-signature"];
-
-  const expectedSignature = crypto
-    .createHmac("sha256", secret)
-    .update(JSON.stringify(req.body))
-    .digest("hex");
-
-  if (signature === expectedSignature) {
-    if (req.body.event === "order.paid") {
-      await paymentService.finalizePayment(req.body.payload.payment.entity.order_id);
-    }
-    res.status(200).send("OK");
-  } else {
-    res.status(400).send("Invalid Signature");
-  }
-};
 
 // CONFIRM MOCK PAYMENT
 export const confirmMockPayment = async (req: Request, res: Response) => {
