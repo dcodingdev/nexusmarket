@@ -1,0 +1,31 @@
+# ---------- 1. DEPS STAGE ----------
+FROM node:20-alpine AS deps
+WORKDIR /app
+RUN npm install -g pnpm
+
+COPY pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY package.json ./
+COPY packages/api-contracts/package.json ./packages/api-contracts/
+COPY packages/common/package.json ./packages/common/
+COPY packages/config/package.json ./packages/config/
+COPY packages/database/package.json ./packages/database/
+COPY packages/logger/package.json ./packages/logger/
+COPY packages/rabbitmq/package.json ./packages/rabbitmq/
+COPY packages/types/package.json ./packages/types/
+COPY services/chat-service/package.json ./services/chat-service/
+RUN pnpm install --filter @repo/chat-service... --frozen-lockfile
+
+# ---------- 2. BUILD STAGE ----------
+FROM deps AS builder
+COPY packages ./packages
+COPY services/chat-service ./services/chat-service
+RUN pnpm --filter @repo/chat-service... run build
+
+# ---------- 3. RUNNER ----------
+FROM node:20-alpine
+WORKDIR /app
+ENV NODE_ENV=production
+RUN npm install -g pnpm
+COPY --from=builder /app .
+EXPOSE 4006
+CMD ["node", "services/chat-service/dist/src/server.js"]

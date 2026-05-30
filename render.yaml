@@ -15,7 +15,7 @@ services:
     plan: free
     runtime: docker
     repo: https://github.com/dcodingdev/nexusmarket
-    dockerfilePath: services/auth-service/Dockerfile
+    dockerfilePath: services/auth-service/Dockerfile.prod
     dockerContext: .
     envVars:
       - key: NODE_ENV
@@ -41,7 +41,7 @@ services:
     plan: free
     runtime: docker
     repo: https://github.com/dcodingdev/nexusmarket
-    dockerfilePath: services/product-service/Dockerfile
+    dockerfilePath: services/product-service/Dockerfile.prod
     dockerContext: .
     envVars:
       - key: NODE_ENV
@@ -71,7 +71,7 @@ services:
     plan: free
     runtime: docker
     repo: https://github.com/dcodingdev/nexusmarket
-    dockerfilePath: services/order-service/Dockerfile
+    dockerfilePath: services/order-service/Dockerfile.prod
     dockerContext: .
     envVars:
       - key: NODE_ENV
@@ -95,7 +95,7 @@ services:
     plan: free
     runtime: docker
     repo: https://github.com/dcodingdev/nexusmarket
-    dockerfilePath: services/payment-service/Dockerfile
+    dockerfilePath: services/payment-service/Dockerfile.prod
     dockerContext: .
     envVars:
       - key: NODE_ENV
@@ -123,7 +123,7 @@ services:
     plan: free
     runtime: docker
     repo: https://github.com/dcodingdev/nexusmarket
-    dockerfilePath: services/chat-service/Dockerfile
+    dockerfilePath: services/chat-service/Dockerfile.prod
     dockerContext: .
     envVars:
       - key: NODE_ENV
