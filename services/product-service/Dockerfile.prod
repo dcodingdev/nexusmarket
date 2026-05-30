@@ -35,4 +35,4 @@ COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/services/product-service/dist ./services/product-service/dist
 COPY --from=builder /app/services/product-service/package.json ./services/product-service/package.json
 EXPOSE 4002
-CMD ["node", "services/product-service/dist/src/server.js"]
+CMD ["node", "services/product-service/dist/services/product-service/src/server.js"]

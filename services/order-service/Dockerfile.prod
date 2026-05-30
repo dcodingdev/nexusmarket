@@ -33,4 +33,4 @@ COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/services/order-service/dist ./services/order-service/dist
 COPY --from=builder /app/services/order-service/package.json ./services/order-service/package.json
 EXPOSE 4003
-CMD ["node", "services/order-service/dist/src/server.js"]
+CMD ["node", "services/order-service/dist/services/order-service/src/server.js"]

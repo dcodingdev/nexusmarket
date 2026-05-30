@@ -33,4 +33,4 @@ COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/services/payment-service/dist ./services/payment-service/dist
 COPY --from=builder /app/services/payment-service/package.json ./services/payment-service/package.json
 EXPOSE 4004
-CMD ["node", "services/payment-service/dist/src/server.js"]
+CMD ["node", "services/payment-service/dist/services/payment-service/src/server.js"]

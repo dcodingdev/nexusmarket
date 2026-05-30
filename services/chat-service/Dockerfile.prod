@@ -33,4 +33,4 @@ COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/services/chat-service/dist ./services/chat-service/dist
 COPY --from=builder /app/services/chat-service/package.json ./services/chat-service/package.json
 EXPOSE 4006
-CMD ["node", "services/chat-service/dist/src/server.js"]
+CMD ["node", "services/chat-service/dist/services/chat-service/src/server.js"]
