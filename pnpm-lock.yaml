@@ -180,6 +180,10 @@ importers:
       zod:
         specifier: ^3.23.0
         version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
 
   packages/common:
     dependencies:
@@ -208,6 +212,9 @@ importers:
       '@types/jsonwebtoken':
         specifier: ^9.0.10
         version: 9.0.10
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
 
   packages/config:
     dependencies:
@@ -298,7 +305,11 @@ importers:
         specifier: ^5.0.0
         version: 5.9.3
 
-  packages/types: {}
+  packages/types:
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
 
   services/auth-service:
     dependencies:
