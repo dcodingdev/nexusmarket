@@ -4,16 +4,24 @@
   "private": true,
   "type": "module",
   "files": [
-    "typescript/*.json"
+    "typescript/*.json",
+    "dist"
   ],
+  "main": "./dist/env.js",
   "exports": {
     "./typescript/base.json": "./typescript/base.json",
     "./typescript/node.json": "./typescript/node.json",
     "./typescript/nextjs.json": "./typescript/nextjs.json",
-    "./env": "./src/env.ts"
+    "./env": "./dist/env.js"
+  },
+  "scripts": {
+    "build": "tsc"
   },
   "dependencies": {
     "dotenv": "^17.4.2",
     "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
   }
 }
