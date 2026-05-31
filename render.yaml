@@ -154,27 +154,12 @@ services:
     dockerContext: .
     envVars:
       - key: AUTH_SERVICE_URL
-        fromService:
-          name: nexusmarket-auth
-          type: web
-          property: host
+        value: nexusmarket-auth.onrender.com
       - key: PRODUCT_SERVICE_URL
-        fromService:
-          name: nexusmarket-product
-          type: web
-          property: host
+        value: nexusmarket-product.onrender.com
       - key: ORDER_SERVICE_URL
-        fromService:
-          name: nexusmarket-order
-          type: web
-          property: host
+        value: nexusmarket-order.onrender.com
       - key: PAYMENT_SERVICE_URL
-        fromService:
-          name: nexusmarket-payment
-          type: web
-          property: host
+        value: nexusmarket-payment.onrender.com
       - key: CHAT_SERVICE_URL
-        fromService:
-          name: nexusmarket-chat
-          type: web
-          property: host
+        value: nexusmarket-chat.onrender.com

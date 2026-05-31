@@ -3,24 +3,23 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    
-    // Output settings
     "outDir": "./dist",
     "rootDir": "./src",
-    
-    // Monorepo & Development Essentials
-    "declaration": true,      // Generates .d.ts files for IntelliSense
-    "declarationMap": true,   // Maps types back to source for "Go to Definition"
-    "sourceMap": true,        // Essential for debugging in Dev
-    "composite": true,        // Allows Turborepo to build incrementally
-    
-    // Strictness
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
