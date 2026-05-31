@@ -35,9 +35,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/packages/api-contracts/node_modules ./packages/api-contracts/node_modules
 COPY --from=deps /app/packages/common/node_modules ./packages/common/node_modules
 COPY --from=deps /app/packages/config/node_modules ./packages/config/node_modules
-COPY --from=deps /app/packages/database/node_modules ./packages/database/node_modules
+
 COPY --from=deps /app/packages/logger/node_modules ./packages/logger/node_modules
-COPY --from=deps /app/packages/rabbitmq/node_modules ./packages/rabbitmq/node_modules
 COPY --from=deps /app/packages/types/node_modules ./packages/types/node_modules
 COPY --from=deps /app/services/order-service/node_modules ./services/order-service/node_modules
 
