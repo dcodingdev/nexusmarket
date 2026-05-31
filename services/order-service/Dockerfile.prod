@@ -24,10 +24,12 @@ COPY packages/logger ./packages/logger
 COPY packages/rabbitmq ./packages/rabbitmq
 COPY packages/types ./packages/types
 COPY services/order-service ./services/order-service
+
 RUN pnpm --filter @repo/types run build
+RUN pnpm --filter @repo/logger run build        
 RUN pnpm --filter @repo/config run build
 RUN pnpm --filter @repo/api-contracts run build
-RUN pnpm --filter @repo/common run build
+RUN pnpm --filter @repo/common run build    
 RUN pnpm --filter @repo/order-service... run build
 
 # ---------- 3. RUNNER ----------
