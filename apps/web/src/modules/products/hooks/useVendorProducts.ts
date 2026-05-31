@@ -30,3 +30,4 @@ export function useVendorProducts(vendorId: string, params: { page?: number; lim
     enabled: !!vendorId,
   });
 }
+

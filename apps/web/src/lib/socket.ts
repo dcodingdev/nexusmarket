@@ -4,7 +4,7 @@ import { io, Socket } from "socket.io-client";
 import type {
   SocketServerToClientEvents,
   SocketClientToServerEvents,
-} from "@repo/types";
+} from "@/types";
 
 export type TypedClientSocket = Socket<
   SocketServerToClientEvents,
@@ -53,3 +53,4 @@ export function disconnectSocket(): void {
     socket = null;
   }
 }
+

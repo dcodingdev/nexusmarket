@@ -16,3 +16,4 @@ export function TypingIndicator() {
     </div>
   );
 }
+

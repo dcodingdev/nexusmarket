@@ -143,3 +143,4 @@ export function ProductForm({ initialData, onSubmit, isLoading }: ProductFormPro
     </form>
   );
 }
+

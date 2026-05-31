@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import type { ChatMessage } from "@repo/types";
+import type { ChatMessage } from "@/types";
 
 interface MessageBubbleProps {
   message: ChatMessage;
@@ -36,3 +36,4 @@ export function MessageBubble({ message, isSender }: MessageBubbleProps) {
     </div>
   );
 }
+

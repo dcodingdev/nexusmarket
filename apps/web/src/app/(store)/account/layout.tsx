@@ -2,7 +2,7 @@
 
 import { AccountSidebar } from "@/modules/account/components/AccountSidebar";
 import { RoleGuard } from "@/components/auth/RoleGuard";
-import { UserRole } from "@repo/types";
+import { UserRole } from "@/types";
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,3 +35,4 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
     </RoleGuard>
   );
 }
+

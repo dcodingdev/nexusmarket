@@ -1,5 +1,5 @@
-import { LoginInput, RegisterInput } from '@repo/api-contracts';
-import { User } from '@repo/types';
+import { LoginInput, RegisterInput } from '@/types';
+import { User } from '@/types';
 
 const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:8000/api/v1/auth';
 
@@ -72,3 +72,4 @@ export const authClient = {
     });
   },
 };
+

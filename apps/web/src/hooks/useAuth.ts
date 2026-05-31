@@ -2,7 +2,7 @@
 
 import { useAuthStore } from '../store/useAuthStore';
 import { authClient } from '../lib/auth';
-import { LoginInput, RegisterInput } from '@repo/api-contracts';
+import { LoginInput, RegisterInput } from '@/types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -73,3 +73,4 @@ export const useAuth = () => {
     logout,
   };
 };
+

@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import type { Conversation } from "@repo/types";
+import type { Conversation } from "@/types";
 import { MessageSquare } from "lucide-react";
 
 interface ConversationListProps {
@@ -88,3 +88,4 @@ export function ConversationList({
     </div>
   );
 }
+

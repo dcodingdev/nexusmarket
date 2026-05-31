@@ -3,7 +3,7 @@
 import React from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
-import { UserRole } from '@repo/types';
+import { UserRole } from '@/types';
 import { notFound, useRouter } from 'next/navigation';
 import { apiClient } from '@/core/api/client';
 import { authClient } from '@/lib/auth';
@@ -104,3 +104,4 @@ export const RoleGuard = ({ children, role, fallback }: RoleGuardProps) => {
 
   return <>{children}</>;
 };
+

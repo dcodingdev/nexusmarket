@@ -65,3 +65,4 @@ export const getGroupedItems = (state: CartState) => {
     return acc;
   }, {} as Record<string, CartItem[]>);
 };
+

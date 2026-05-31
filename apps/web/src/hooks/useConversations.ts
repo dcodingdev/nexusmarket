@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { Conversation, ChatMessage } from "@repo/types";
+import type { Conversation, ChatMessage } from "@/types";
 import { apiClient } from "@/core/api/client";
 
 async function fetchConversations(): Promise<Conversation[]> {
@@ -29,3 +29,4 @@ export function useMessages(conversationId: string, token: string) {
     staleTime: 60_000,
   });
 }
+

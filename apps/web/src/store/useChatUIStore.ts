@@ -15,3 +15,4 @@ export const useChatUIStore = create<ChatUIState>((set) => ({
   setActiveConversationId: (activeConversationId) => set({ activeConversationId }),
   openChat: (conversationId) => set({ isOpen: true, activeConversationId: conversationId }),
 }));
+

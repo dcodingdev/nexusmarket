@@ -19,3 +19,4 @@ export function DataTableSkeleton({ columns }: { columns: number }) {
     </>
   );
 }
+

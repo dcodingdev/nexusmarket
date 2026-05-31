@@ -152,3 +152,4 @@ export default function UserManagementPage() {
 function cn(...inputs: any[]) {
   return inputs.filter(Boolean).join(" ");
 }
+

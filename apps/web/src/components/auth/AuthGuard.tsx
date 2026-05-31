@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { UserRole } from '@repo/types';
+import { UserRole } from '@/types';
 import { useRouter } from 'next/navigation';
 
 interface AuthGuardProps {
@@ -55,3 +55,4 @@ export const AuthGuard = ({ children, allowedRoles, fallback }: AuthGuardProps) 
 
   return <>{children}</>;
 };
+

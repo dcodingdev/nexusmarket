@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { User, UserRole } from '@repo/types';
+import { User, UserRole } from '@/types';
 
 interface AuthState {
   user: User | null;
@@ -33,3 +33,4 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+

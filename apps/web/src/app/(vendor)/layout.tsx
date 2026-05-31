@@ -1,6 +1,6 @@
 import { Sidebar } from "@/modules/vendor/components/Sidebar";
 import { RoleGuard } from "@/components/auth/RoleGuard";
-import { UserRole } from "@repo/types";
+import { UserRole } from "@/types";
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 
@@ -26,3 +26,4 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     </RoleGuard>
   );
 }
+

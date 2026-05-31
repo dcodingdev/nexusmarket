@@ -16,7 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { RoleGuard } from "@/components/auth/RoleGuard";
-import { UserRole } from "@repo/types";
+import { UserRole } from "@/types";
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: "Overview", href: "/admin" },
@@ -107,3 +107,4 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </RoleGuard>
   );
 }
+

@@ -9,3 +9,4 @@ export const metadata: Metadata = {
 export default function Custom404Page() {
   return <NotFoundView />;
 }
+

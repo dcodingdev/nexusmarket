@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { getSocket, disconnectSocket } from "@/lib/socket";
-import type { ChatMessage, TypingPayload } from "@repo/types";
+import type { ChatMessage, TypingPayload } from "@/types";
 
 interface UseChatOptions {
   conversationId: string;
@@ -117,3 +117,4 @@ export function useChat({
 
   return { sendMessage, emitTyping, emitStopTyping, isConnected, typingUsers };
 }
+
