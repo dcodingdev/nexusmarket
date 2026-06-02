@@ -1,7 +1,5 @@
 FROM nginx:stable-alpine
 
-# Install envsubst (already in nginx:alpine)
 COPY infrastructure/nginx/nginx.conf.prod /etc/nginx/nginx.conf.prod
 
-# envsubst replaces $VARIABLES in conf with real env values at runtime
-CMD ["/bin/sh", "-c", "envsubst '${AUTH_SERVICE_URL} ${PRODUCT_SERVICE_URL} ${ORDER_SERVICE_URL} ${PAYMENT_SERVICE_URL} ${CHAT_SERVICE_URL}' < /etc/nginx/nginx.conf.prod > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"]
+CMD ["/bin/sh", "-c", "envsubst '${AUTH_SERVICE_URL} ${PRODUCT_SERVICE_URL} ${ORDER_SERVICE_URL} ${PAYMENT_SERVICE_URL} ${CHAT_SERVICE_URL}' < /etc/nginx/nginx.conf.prod > /etc/nginx/nginx.conf && nginx -t && nginx -g 'daemon off;'"]
