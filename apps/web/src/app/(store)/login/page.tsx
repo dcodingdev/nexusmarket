@@ -51,33 +51,6 @@ function LoginContent() {
     }
   };
 
-  const handleDemoLogin = async (role: 'customer' | 'vendor' | 'admin') => {
-    const accounts = {
-      admin: { email: 'admin@nexusmarket.com', password: 'admin123', name: 'Nexus Admin', role: 'admin' },
-      vendor: { email: 'vendor@nexusmarket.com', password: 'password123', name: 'Nexus Vendor', role: 'vendor' },
-      customer: { email: 'customer@nexusmarket.com', password: 'password123', name: 'Nexus Customer', role: 'customer' }
-    };
-    const account = accounts[role];
-    form.setValue('email', account.email);
-    form.setValue('password', account.password);
-    
-    try {
-      await login({ email: account.email, password: account.password });
-    } catch (err: any) {
-      if (role !== 'admin') {
-        try {
-          const { authClient } = await import('@/lib/auth');
-          await authClient.register(account as any);
-          await login({ email: account.email, password: account.password });
-          return;
-        } catch (regErr) {
-          console.error(regErr);
-        }
-      }
-      form.setError('root', { message: err.message || 'Login failed' });
-    }
-  };
-
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in duration-500">
@@ -147,41 +120,6 @@ function LoginContent() {
             </Button>
           </form>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Demo Quick Login</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-2">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => handleDemoLogin('customer')}
-              className="text-[10px] h-10 px-1 font-bold border-indigo-500/20 hover:bg-indigo-500/5 hover:border-indigo-500/40 transition-all rounded-xl"
-            >
-              👤 Customer
-            </Button>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => handleDemoLogin('vendor')}
-              className="text-[10px] h-10 px-1 font-bold border-violet-500/20 hover:bg-violet-500/5 hover:border-violet-500/40 transition-all rounded-xl"
-            >
-              🏪 Vendor
-            </Button>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => handleDemoLogin('admin')}
-              className="text-[10px] h-10 px-1 font-bold border-blue-500/20 hover:bg-blue-500/5 hover:border-blue-500/40 transition-all rounded-xl"
-            >
-              🔑 Admin
-            </Button>
-          </div>
         </div>
 
         <p className="text-center text-sm text-muted-foreground">

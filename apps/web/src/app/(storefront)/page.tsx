@@ -56,32 +56,6 @@ export default function StorefrontPage() {
         </div>
       </section>
 
-      {/* 2. STATS SECTION */}
-      <section className="py-16 md:py-24 relative z-10 border-y border-white/[0.02] bg-black/20 backdrop-blur-sm">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center max-w-6xl mx-auto">
-            {[
-              { icon: TrendingUp, value: '99.9%', label: 'Checkout Success' },
-              { icon: Users, value: '500+', label: 'Active Vendors' },
-              { icon: CheckCircle2, value: '10K+', label: 'Fulfilled Orders' },
-              { icon: ShieldCheck, value: '100%', label: 'Secure Vaults' }
-            ].map((stat, i) => (
-              <div key={i} className="space-y-5 group">
-                <div className="flex justify-center">
-                  <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] group-hover:bg-primary/5 group-hover:border-primary/20 group-hover:shadow-[0_0_30px_-5px] group-hover:shadow-primary/20 transition-all duration-500 ease-out">
-                    <stat.icon className="w-5 h-5 text-muted-foreground/60 group-hover:text-primary transition-colors duration-500" />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-3xl md:text-5xl font-semibold tracking-tighter text-foreground/90 group-hover:text-foreground transition-colors duration-500">{stat.value}</h3>
-                  <p className="text-[10px] md:text-xs uppercase text-muted-foreground/50 font-medium tracking-[0.2em] mt-3">{stat.label}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* 3. FEATURES SECTION */}
       <section className="py-24 md:py-32 relative z-10">
         <div className="container mx-auto px-6 max-w-7xl">
