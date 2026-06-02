@@ -2,9 +2,14 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, useEffect } from 'react';
+import { wakeAllServices } from '@/lib/wake-services';
 
 export function QueryProvider({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    wakeAllServices();
+  }, []);
+
   const [queryClient] = useState(
     () =>
       new QueryClient({
