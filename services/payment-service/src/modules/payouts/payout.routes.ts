@@ -4,12 +4,14 @@ import { authenticate, authorize, validateRequest } from "@repo/common";
 import { UserRole } from "@repo/types";
 import { RequestPayoutSchema } from "@repo/api-contracts";
 
-const router = Router();
+
+
+const router: Router = Router();
 
 router.route("/request")
   .post(
-    authenticate, 
-    authorize([UserRole.VENDOR]), 
+    authenticate,
+    authorize([UserRole.VENDOR]),
     validateRequest({ body: RequestPayoutSchema }),
     payoutController.requestPayout
   );

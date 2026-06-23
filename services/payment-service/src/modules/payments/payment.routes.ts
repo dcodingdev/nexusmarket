@@ -6,7 +6,7 @@ import { CreatePaymentSessionSchema } from "@repo/api-contracts";
 
 import { pppMiddleware } from "../../middleware/ppp.middleware.js";
 
-const router = Router();
+const router: Router = Router();
 
 /**
  * @route   POST /api/v1/payments/process
@@ -15,7 +15,7 @@ const router = Router();
  */
 router.route("/process")
   .post(
-    authenticate, 
+    authenticate,
     pppMiddleware,
     validateRequest({ body: CreatePaymentSessionSchema }),
     paymentController.createPaymentSession
