@@ -52,7 +52,7 @@ export const authClient = {
    */
   async refresh(): Promise<{ accessToken: string }> {
     const res = await fetch(`${AUTH_URL}/refresh`, {
-      method: 'POST',
+      method: 'GET',
       credentials: 'include',
     });
 
