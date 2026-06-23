@@ -6,7 +6,7 @@ export interface IPayment extends Document {
   amount: number;
   currency: string;
   status: "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED";
-  gateway: "STRIPE" | "PAYPAL";
+  gateway: "STRIPE" | "PAYPAL" | "MOCK";
   transactionId?: string;
   metadata?: Record<string, any>;
 }
@@ -23,7 +23,7 @@ const paymentSchema = new Schema<IPayment>(
       default: "PENDING",
       index: true
     },
-    gateway: { type: String, enum: ["STRIPE", "PAYPAL", "RAZORPAY"], required: true }, // Kept in schema for backwards compatibility with existing DB records
+    gateway: { type: String, enum: ["STRIPE", "PAYPAL", "RAZORPAY", "MOCK"], required: true }, // Kept in schema for backwards compatibility with existing DB records
     transactionId: { type: String, unique: true, sparse: true },
     metadata: { type: Object },
   },

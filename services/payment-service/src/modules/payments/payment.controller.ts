@@ -21,6 +21,8 @@ export const createPaymentSession = async (req: Request, res: Response) => {
     let gatewayResponse;
     if (gateway === "STRIPE") {
       gatewayResponse = await paymentService.createStripeSession(finalAmount, currency, orderId, req.user!._id.toString());
+    } else if (gateway === "MOCK") {
+      gatewayResponse = { id: `mock_txn_${Date.now()}`, url: "http://mock.gateway/pay" };
     } else {
       // Fallback to Stripe if paypal/other isn't implemented yet, or throw error
       throw new Error(`Gateway ${gateway} is not implemented`);

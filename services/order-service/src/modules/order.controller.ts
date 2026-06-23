@@ -4,7 +4,7 @@ import { mongoose } from "@repo/database";
 import axios from "axios";
 import logger from "@repo/logger";
 
-const STOCK_SERVICE_URL = process.env.STOCK_SERVICE_URL || "http://product-service:4002/api/stock";
+const getStockServiceUrl = () => process.env.STOCK_SERVICE_URL || "http://product-service:4002/api/stock";
 
 export const createOrder = async (req: Request, res: Response) => {
   // Track successful reservations to roll back if a later item fails
@@ -44,7 +44,7 @@ export const createOrder = async (req: Request, res: Response) => {
         amount: item.quantity,
       }));
 
-      await axios.post(`${STOCK_SERVICE_URL}/batch/reserve`, { items: batchItems });
+      await axios.post(`${getStockServiceUrl()}/batch/reserve`, { items: batchItems });
       // If batch reserve succeeds, all items are reserved.
       batchItems.forEach((item: any) => reservedItems.push(item.productId));
     } catch (stockError: any) {
@@ -55,7 +55,7 @@ export const createOrder = async (req: Request, res: Response) => {
           return { productId, amount: item.quantity };
         });
 
-        await axios.post(`${STOCK_SERVICE_URL}/batch/release`, { items: rollbackItems })
+        await axios.post(`${getStockServiceUrl()}/batch/release`, { items: rollbackItems })
           .catch((err: any) => logger.error(`Failed to rollback stock for batch`));
       }
 

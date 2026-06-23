@@ -99,7 +99,7 @@ const start = async () => {
     /**
      * RabbitMQ Connection
      */
-
+    await connectRMQ(env.RABBITMQ_URL!);
 
     /**
      * Start HTTP Server
